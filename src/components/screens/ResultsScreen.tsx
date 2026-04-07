@@ -13,8 +13,19 @@ import {
   Map,
   Star,
 } from 'lucide-react';
+import React from 'react';
 
 const TIER_KEYS: StarLevel[] = [6, 7, 8, 9];
+
+function renderMarkdown(text: string): React.ReactNode[] {
+  const parts = text.split(/(\*\*[^*]+\*\*)/g);
+  return parts.map((part, i) => {
+    if (part.startsWith('**') && part.endsWith('**')) {
+      return <strong key={i} className="text-white font-semibold">{part.slice(2, -2)}</strong>;
+    }
+    return <React.Fragment key={i}>{part}</React.Fragment>;
+  });
+}
 
 function ModelDot({ model }: { model: string }) {
   const color =
@@ -154,7 +165,7 @@ function IdeaCard({ idea }: { idea: Idea }) {
                 Flesh It Out
               </h4>
               <div className="text-sm text-gray-400 leading-relaxed whitespace-pre-line">
-                {detail.what_it_takes}
+                {renderMarkdown(detail.what_it_takes)}
               </div>
             </div>
 
@@ -165,7 +176,7 @@ function IdeaCard({ idea }: { idea: Idea }) {
                 Regression Version
               </h4>
               <div className="text-sm text-gray-400 leading-relaxed whitespace-pre-line">
-                {detail.regression_version}
+                {renderMarkdown(detail.regression_version)}
               </div>
             </div>
           </div>
