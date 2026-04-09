@@ -6,7 +6,7 @@ export async function POST(req: NextRequest) {
   try {
     const user = await getSessionUser();
 
-    const { challengeId, content, status = "submitted" } = await req.json();
+    const { challengeId, content } = await req.json();
 
     if (!challengeId || !content) {
       return NextResponse.json(
@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
       where: {
         userId: user.id,
         challengeId,
-        status: "submitted",
+        status: { in: ["submitted", "reviewed"] },
       },
     });
 
@@ -34,8 +34,8 @@ export async function POST(req: NextRequest) {
     const submission = await prisma.submission.create({
       data: {
         content,
-        status,
-        completionScore: status === "submitted" ? 1 : 0,
+        status: "submitted",
+        completionScore: 1,
         userId: user.id,
         challengeId,
       },

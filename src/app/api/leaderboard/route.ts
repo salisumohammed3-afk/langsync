@@ -13,7 +13,7 @@ export async function GET() {
       },
       include: {
         submissions: {
-          where: { status: "submitted" },
+          where: { status: { in: ["submitted", "reviewed"] } },
           orderBy: { submittedAt: "desc" },
         },
       },

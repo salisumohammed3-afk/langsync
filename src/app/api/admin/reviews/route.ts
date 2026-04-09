@@ -27,9 +27,17 @@ export async function GET() {
 
 export async function PATCH(req: NextRequest) {
   try {
-    await getSessionUser();
+    const reviewer = await getSessionUser();
 
     const { submissionId, qualityScore, impactScore, reviewerFeedback } = await req.json();
+
+    // Verify submission belongs to the reviewer's company
+    const existing = await prisma.submission.findFirst({
+      where: { id: submissionId, user: { companyId: reviewer.companyId } },
+    });
+    if (!existing) {
+      return NextResponse.json({ error: "Submission not found" }, { status: 404 });
+    }
 
     const submission = await prisma.submission.update({
       where: { id: submissionId },
