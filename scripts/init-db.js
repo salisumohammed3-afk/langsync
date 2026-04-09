@@ -2,19 +2,45 @@
 // It pushes the Prisma schema and seeds data if the DB is empty.
 const { execSync } = require('child_process');
 const path = require('path');
+const fs = require('fs');
 
-const prismaDir = path.join(__dirname, '..', 'node_modules', '.bin');
+// Ensure /data directory exists for Railway volume
+const dataDir = '/data';
+if (!fs.existsSync(dataDir)) {
+  try {
+    fs.mkdirSync(dataDir, { recursive: true });
+    console.log('Created /data directory');
+  } catch (e) {
+    console.log('/data directory check:', e.message);
+  }
+}
+
+const rootDir = path.join(__dirname, '..');
 
 try {
   console.log('Pushing database schema...');
-  execSync(`${path.join(prismaDir, 'prisma')} db push --skip-generate`, {
+  execSync('npx prisma db push --skip-generate', {
     stdio: 'inherit',
-    cwd: path.join(__dirname, '..'),
+    cwd: rootDir,
+    env: { ...process.env, DATABASE_URL: process.env.DATABASE_URL || 'file:/data/langsync.db' },
   });
   console.log('Schema pushed successfully.');
 } catch (e) {
   console.error('Failed to push schema:', e.message);
-  process.exit(1);
+  // Try without --skip-generate as fallback
+  try {
+    console.log('Retrying with prisma generate first...');
+    execSync('npx prisma generate', { stdio: 'inherit', cwd: rootDir });
+    execSync('npx prisma db push', {
+      stdio: 'inherit',
+      cwd: rootDir,
+      env: { ...process.env, DATABASE_URL: process.env.DATABASE_URL || 'file:/data/langsync.db' },
+    });
+    console.log('Schema pushed successfully on retry.');
+  } catch (e2) {
+    console.error('Failed to push schema on retry:', e2.message);
+    process.exit(1);
+  }
 }
 
 // Check if seeding is needed
