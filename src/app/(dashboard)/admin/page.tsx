@@ -36,15 +36,6 @@ export default function AdminPage() {
       .catch(() => setLoading(false));
   }, []);
 
-  if (session?.user?.role !== "admin") {
-    return (
-      <div className="text-center py-20">
-        <h2 className="text-xl font-semibold text-gray-900">Access Denied</h2>
-        <p className="mt-2 text-gray-600">You need admin access to view this page.</p>
-      </div>
-    );
-  }
-
   if (loading || !analytics) {
     return (
       <div className="flex h-64 items-center justify-center">
@@ -58,7 +49,7 @@ export default function AdminPage() {
       <div className="mb-6 flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Admin Dashboard</h1>
-          <p className="text-sm text-gray-500">{session.user.companyName} overview</p>
+          <p className="text-sm text-gray-500">QVC UK overview</p>
         </div>
         <div className="flex gap-3">
           <Link href="/admin/reviews" className="btn-secondary">

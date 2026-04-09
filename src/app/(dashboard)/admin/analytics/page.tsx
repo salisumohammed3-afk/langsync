@@ -44,15 +44,6 @@ export default function AnalyticsPage() {
       .catch(() => setLoading(false));
   }, []);
 
-  if (session?.user?.role !== "admin") {
-    return (
-      <div className="text-center py-20">
-        <h2 className="text-xl font-semibold text-gray-900">Access Denied</h2>
-        <p className="mt-2 text-gray-600">Admin access required.</p>
-      </div>
-    );
-  }
-
   if (loading || !analytics) {
     return (
       <div className="flex h-64 items-center justify-center">

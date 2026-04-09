@@ -37,7 +37,7 @@ export default function ProfilePage() {
       .catch(() => setLoading(false));
   }, []);
 
-  if (!session) return null;
+  const userName = (session?.user as unknown as { name?: string })?.name || "Guest User";
 
   const totalPoints = submissions.reduce(
     (sum, s) => sum + s.completionScore + (s.qualityScore || 0) + (s.impactScore || 0),

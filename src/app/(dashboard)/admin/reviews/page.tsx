@@ -40,15 +40,6 @@ export default function ReviewsPage() {
       .catch(() => setLoading(false));
   }, []);
 
-  if (!session || !["reviewer", "admin"].includes(session.user.role)) {
-    return (
-      <div className="text-center py-20">
-        <h2 className="text-xl font-semibold text-gray-900">Access Denied</h2>
-        <p className="mt-2 text-gray-600">Reviewer access required.</p>
-      </div>
-    );
-  }
-
   const filtered = submissions.filter((s) => {
     if (filter === "pending") return s.status === "submitted";
     if (filter === "reviewed") return s.status === "reviewed";
