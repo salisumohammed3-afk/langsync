@@ -1,0 +1,132 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Company {
+  id          String   @id @default(cuid())
+  name        String
+  logoUrl     String?
+  brandColour String   @default("#4c6ef5")
+  websiteUrl  String?
+  industry    String?
+  notes       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  users       User[]
+  programmes  Programme[]
+}
+
+model User {
+  id            String   @id @default(cuid())
+  name          String
+  email         String   @unique
+  passwordHash  String
+  role          String   @default("challenger") // challenger, reviewer, admin
+  avatarUrl     String?
+  teamName      String?
+  companyId     String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  company       Company       @relation(fields: [companyId], references: [id])
+  submissions   Submission[]
+  conversations Conversation[]
+}
+
+model Programme {
+  id            String   @id @default(cuid())
+  title         String
+  description   String?
+  durationMonths Int     @default(3)
+  companyId     String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  company       Company  @relation(fields: [companyId], references: [id])
+  months        Month[]
+}
+
+model Month {
+  id          String   @id @default(cuid())
+  number      Int
+  theme       String
+  description String?
+  programmeId String
+  createdAt   DateTime @default(now())
+
+  programme   Programme   @relation(fields: [programmeId], references: [id])
+  challenges  Challenge[]
+}
+
+model Challenge {
+  id                String   @id @default(cuid())
+  title             String
+  brief             String
+  type              String   @default("SEO") // SEO, AEO, hybrid
+  timeEstimate      String   @default("30 minutes")
+  greatExample      String?
+  competitorExamples String? // JSON array stored as text
+  unlockDate        DateTime
+  practiceEnabled   Boolean  @default(false)
+  scoringCriteria   String?
+  weekNumber        Int      @default(1)
+  monthId           String
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  month             Month          @relation(fields: [monthId], references: [id])
+  submissions       Submission[]
+  conversations     Conversation[]
+}
+
+model Submission {
+  id               String   @id @default(cuid())
+  content          String
+  attachments      String?  // JSON array of URLs
+  status           String   @default("submitted") // draft, submitted, reviewed
+  completionScore  Int      @default(1) // 0 or 1
+  qualityScore     Int?     // 1-3
+  impactScore      Int?     // 1-3
+  aiQualityScore   Int?     // 1-3
+  aiRationale      String?
+  reviewerFeedback String?
+  aiFeedback       String?
+  submittedAt      DateTime @default(now())
+  reviewedAt       DateTime?
+  userId           String
+  challengeId      String
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  user             User      @relation(fields: [userId], references: [id])
+  challenge        Challenge @relation(fields: [challengeId], references: [id])
+}
+
+model Conversation {
+  id          String   @id @default(cuid())
+  messages    String   @default("[]") // JSON array of messages
+  userId      String
+  challengeId String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user        User      @relation(fields: [userId], references: [id])
+  challenge   Challenge @relation(fields: [challengeId], references: [id])
+}
+
+model PracticeDraft {
+  id            String   @id @default(cuid())
+  content       String
+  aiFeedback    String?  // JSON: {strengths, improvements, scorePreview}
+  humanFeedback String?
+  draftNumber   Int      @default(1)
+  userId        String
+  challengeId   String
+  createdAt     DateTime @default(now())
+}

@@ -1,0 +1,43 @@
+{
+  "name": "langsync-challenge-platform",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "prisma generate && next build",
+    "start": "next start",
+    "lint": "next lint",
+    "postinstall": "prisma generate",
+    "db:push": "prisma db push",
+    "db:seed": "tsx prisma/seed.ts"
+  },
+  "dependencies": {
+    "next": "14.2.21",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "@prisma/client": "^5.22.0",
+    "next-auth": "^4.24.11",
+    "bcryptjs": "^2.4.3",
+    "@heroicons/react": "^2.2.0",
+    "clsx": "^2.1.1",
+    "tailwind-merge": "^2.6.0",
+    "recharts": "^2.15.0",
+    "date-fns": "^4.1.0",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@types/bcryptjs": "^2.4.6",
+    "typescript": "^5.7.2",
+    "tailwindcss": "^3.4.16",
+    "postcss": "^8.4.49",
+    "autoprefixer": "^10.4.20",
+    "prisma": "^5.22.0",
+    "tsx": "^4.19.2",
+    "eslint": "^8.57.1",
+    "eslint-config-next": "14.2.21",
+    "@tailwindcss/typography": "^0.5.15"
+  }
+}
