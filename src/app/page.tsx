@@ -1,28 +1,8 @@
 "use client";
 
-import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
-import { useEffect } from "react";
 import Link from "next/link";
 
 export default function Home() {
-  const { data: session, status } = useSession();
-  const router = useRouter();
-
-  useEffect(() => {
-    if (status === "authenticated") {
-      router.push("/challenges");
-    }
-  }, [status, router]);
-
-  if (status === "loading") {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-brand-600 border-t-transparent" />
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-brand-50 via-white to-brand-100">
       <nav className="flex items-center justify-between px-8 py-6">
@@ -33,11 +13,8 @@ export default function Home() {
           <span className="text-xl font-bold text-gray-900">LangSync</span>
         </div>
         <div className="flex items-center gap-3">
-          <Link href="/login" className="btn-secondary">
-            Sign In
-          </Link>
-          <Link href="/register" className="btn-primary">
-            Get Started
+          <Link href="/challenges" className="btn-primary">
+            Enter Platform
           </Link>
         </div>
       </nav>
@@ -58,11 +35,11 @@ export default function Home() {
           compete with colleagues, and track your progress.
         </p>
         <div className="flex items-center justify-center gap-4">
-          <Link href="/register" className="btn-primary px-8 py-3 text-base">
+          <Link href="/challenges" className="btn-primary px-8 py-3 text-base">
             Start Your Challenge
           </Link>
-          <Link href="/login" className="btn-secondary px-8 py-3 text-base">
-            Sign In
+          <Link href="/leaderboard" className="btn-secondary px-8 py-3 text-base">
+            View Leaderboard
           </Link>
         </div>
 

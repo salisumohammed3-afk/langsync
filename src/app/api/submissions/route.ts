@@ -1,14 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { getSessionUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
 export async function POST(req: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const user = await getSessionUser();
 
     const { challengeId, content, status = "submitted" } = await req.json();
 
@@ -22,7 +18,7 @@ export async function POST(req: NextRequest) {
     // Check if already submitted
     const existing = await prisma.submission.findFirst({
       where: {
-        userId: session.user.id,
+        userId: user.id,
         challengeId,
         status: "submitted",
       },
@@ -40,7 +36,7 @@ export async function POST(req: NextRequest) {
         content,
         status,
         completionScore: status === "submitted" ? 1 : 0,
-        userId: session.user.id,
+        userId: user.id,
         challengeId,
       },
     });
@@ -57,13 +53,10 @@ export async function POST(req: NextRequest) {
 
 export async function GET() {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const user = await getSessionUser();
 
     const submissions = await prisma.submission.findMany({
-      where: { userId: session.user.id },
+      where: { userId: user.id },
       include: { challenge: true },
       orderBy: { createdAt: "desc" },
     });

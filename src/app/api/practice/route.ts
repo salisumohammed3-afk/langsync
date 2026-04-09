@@ -1,14 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { getSessionUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
 export async function POST(req: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const user = await getSessionUser();
 
     const { challengeId, content } = await req.json();
 
@@ -29,7 +25,7 @@ export async function POST(req: NextRequest) {
 
     // Count existing drafts
     const draftCount = await prisma.practiceDraft.count({
-      where: { userId: session.user.id, challengeId },
+      where: { userId: user.id, challengeId },
     });
 
     // Generate AI feedback
@@ -40,7 +36,7 @@ export async function POST(req: NextRequest) {
         content,
         aiFeedback: JSON.stringify(feedback),
         draftNumber: draftCount + 1,
-        userId: session.user.id,
+        userId: user.id,
         challengeId,
       },
     });
@@ -116,10 +112,7 @@ function generatePracticeFeedback(
 
 export async function GET(req: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const user = await getSessionUser();
 
     const url = new URL(req.url);
     const challengeId = url.searchParams.get("challengeId");
@@ -132,7 +125,7 @@ export async function GET(req: NextRequest) {
     }
 
     const drafts = await prisma.practiceDraft.findMany({
-      where: { userId: session.user.id, challengeId },
+      where: { userId: user.id, challengeId },
       orderBy: { draftNumber: "asc" },
     });
 

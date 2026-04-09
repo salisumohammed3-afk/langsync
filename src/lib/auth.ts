@@ -1,7 +1,36 @@
 import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
+import { getServerSession } from "next-auth";
 import bcrypt from "bcryptjs";
 import { prisma } from "./prisma";
+
+// Returns the session user, or a default admin user from the DB when auth is disabled
+export async function getSessionUser(): Promise<{
+  id: string;
+  role: string;
+  companyId: string;
+  companyName: string;
+}> {
+  const session = await getServerSession(authOptions);
+  if (session?.user) {
+    const u = session.user as unknown as { id: string; role: string; companyId: string; companyName: string };
+    return u;
+  }
+  // Fallback: return the first admin user from the database
+  const admin = await prisma.user.findFirst({
+    where: { role: "admin" },
+    include: { company: true },
+  });
+  if (admin) {
+    return { id: admin.id, role: admin.role, companyId: admin.companyId, companyName: admin.company.name };
+  }
+  // Last resort: return first user
+  const user = await prisma.user.findFirst({ include: { company: true } });
+  if (user) {
+    return { id: user.id, role: user.role, companyId: user.companyId, companyName: user.company.name };
+  }
+  throw new Error("No users in database");
+}
 
 export const authOptions: NextAuthOptions = {
   providers: [

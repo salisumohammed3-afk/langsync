@@ -1,20 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { getSessionUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
 export async function POST(req: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const user = await getSessionUser();
 
     const { challengeId, message } = await req.json();
 
     // Get or create conversation
     let conversation = await prisma.conversation.findFirst({
-      where: { userId: session.user.id, challengeId },
+      where: { userId: user.id, challengeId },
     });
 
     const challenge = await prisma.challenge.findUnique({
@@ -65,7 +61,7 @@ export async function POST(req: NextRequest) {
     } else {
       conversation = await prisma.conversation.create({
         data: {
-          userId: session.user.id,
+          userId: user.id,
           challengeId,
           messages: JSON.stringify(messages),
         },

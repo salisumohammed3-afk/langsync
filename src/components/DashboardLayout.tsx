@@ -1,6 +1,6 @@
 "use client";
 
-import { useSession, signOut } from "next-auth/react";
+import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -25,10 +25,13 @@ export default function DashboardLayout({
   const { data: session } = useSession();
   const pathname = usePathname();
 
-  if (!session) return null;
+  // Default user info when not logged in
+  const userName = (session?.user as unknown as { name?: string })?.name || "Guest User";
+  const userRole = (session?.user as unknown as { role?: string })?.role || "admin";
+  const companyName = (session?.user as unknown as { companyName?: string })?.companyName || "QVC UK";
 
-  const isAdmin = session.user.role === "admin";
-  const isReviewer = session.user.role === "reviewer" || isAdmin;
+  const isAdmin = userRole === "admin";
+  const isReviewer = userRole === "reviewer" || isAdmin;
 
   return (
     <div className="flex min-h-screen bg-gray-50">
@@ -40,7 +43,7 @@ export default function DashboardLayout({
           </div>
           <div>
             <span className="text-sm font-bold text-gray-900">LangSync</span>
-            <p className="text-xs text-gray-500">{session.user.companyName}</p>
+            <p className="text-xs text-gray-500">{companyName}</p>
           </div>
         </div>
 
@@ -97,25 +100,16 @@ export default function DashboardLayout({
         <div className="border-t border-gray-200 p-4">
           <div className="flex items-center gap-3">
             <div className="flex h-8 w-8 items-center justify-center rounded-full bg-brand-100 text-sm font-medium text-brand-700">
-              {session.user.name?.charAt(0).toUpperCase()}
+              {userName.charAt(0).toUpperCase()}
             </div>
             <div className="flex-1 min-w-0">
               <p className="truncate text-sm font-medium text-gray-900">
-                {session.user.name}
+                {userName}
               </p>
               <p className="truncate text-xs text-gray-500">
-                {session.user.role}
+                {userRole}
               </p>
             </div>
-            <button
-              onClick={() => signOut({ callbackUrl: "/" })}
-              className="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
-              title="Sign out"
-            >
-              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
-              </svg>
-            </button>
           </div>
         </div>
       </aside>

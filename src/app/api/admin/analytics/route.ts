@@ -1,16 +1,11 @@
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { getSessionUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
 export async function GET() {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session || session.user.role !== "admin") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const companyId = session.user.companyId;
+    const user = await getSessionUser();
+    const companyId = user.companyId;
 
     const [users, submissions, challenges, conversations] = await Promise.all([
       prisma.user.count({ where: { companyId, role: "challenger" } }),

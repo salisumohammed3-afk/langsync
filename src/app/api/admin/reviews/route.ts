@@ -1,18 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { getSessionUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
 export async function GET() {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session || !["reviewer", "admin"].includes(session.user.role)) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const user = await getSessionUser();
 
     const submissions = await prisma.submission.findMany({
       where: {
-        user: { companyId: session.user.companyId },
+        user: { companyId: user.companyId },
         status: { in: ["submitted", "reviewed"] },
       },
       include: {
@@ -31,10 +27,7 @@ export async function GET() {
 
 export async function PATCH(req: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session || !["reviewer", "admin"].includes(session.user.role)) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    await getSessionUser();
 
     const { submissionId, qualityScore, impactScore, reviewerFeedback } = await req.json();
 

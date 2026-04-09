@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { getSessionUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
 export async function GET(
@@ -8,10 +7,7 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const user = await getSessionUser();
 
     const challenge = await prisma.challenge.findUnique({
       where: { id: params.id },
@@ -24,11 +20,11 @@ export async function GET(
           },
         },
         submissions: {
-          where: { userId: session.user.id },
+          where: { userId: user.id },
           orderBy: { createdAt: "desc" },
         },
         conversations: {
-          where: { userId: session.user.id },
+          where: { userId: user.id },
         },
       },
     });
