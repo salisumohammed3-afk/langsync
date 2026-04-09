@@ -6,6 +6,7 @@ RUN apk add --no-cache libc6-compat openssl
 WORKDIR /app
 
 COPY package.json package-lock.json ./
+COPY prisma ./prisma
 RUN npm ci
 
 # Rebuild the source code only when needed
@@ -14,10 +15,7 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# Generate Prisma client
-RUN npx prisma generate
-
-# Build Next.js
+# Build Next.js (prisma generate runs via build script)
 RUN npm run build
 
 # Production image
