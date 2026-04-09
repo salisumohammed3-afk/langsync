@@ -5,4 +5,4 @@ set -e
 node scripts/init-db.js
 
 # Start the Next.js server
-node server.js
+npx next start -p ${PORT:-3000}
