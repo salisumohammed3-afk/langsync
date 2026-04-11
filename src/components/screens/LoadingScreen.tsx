@@ -142,59 +142,54 @@ export function LoadingScreen() {
   const totalIdeasSoFar = allIdeas.length;
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-6">
-      {/* Ambient glows */}
-      <div className="ambient-glow w-96 h-96 bg-ls-claude top-1/4 left-1/4 animate-pulse-slow" />
-      <div className="ambient-glow w-80 h-80 bg-ls-chatgpt top-1/3 right-1/4 animate-pulse-slow" style={{ animationDelay: '1s' }} />
-      <div className="ambient-glow w-72 h-72 bg-ls-gemini bottom-1/4 left-1/3 animate-pulse-slow" style={{ animationDelay: '2s' }} />
-
-      <div className="relative z-10 w-full max-w-lg text-center animate-fade-in">
+    <div className="min-h-screen flex items-center justify-center p-6 bg-white">
+      <div className="w-full max-w-lg text-center animate-fade-in">
         {/* Spinner */}
         <div className="relative mx-auto w-24 h-24 mb-8">
-          <div className="absolute inset-0 rounded-full border-2 border-ls-dark-border" />
+          <div className="absolute inset-0 rounded-full border-2 border-ls-border" />
           <div
-            className="absolute inset-0 rounded-full border-2 border-transparent border-t-ls-accent animate-spin-slow"
+            className="absolute inset-0 rounded-full border-2 border-transparent border-t-ls-red animate-spin-slow"
           />
           <div className="absolute inset-0 flex items-center justify-center">
             {progress === 100 ? (
               <span className="text-2xl font-bold gradient-text">{totalIdeasSoFar}</span>
             ) : (
-              <Sparkles className="w-8 h-8 text-ls-accent animate-pulse" />
+              <Sparkles className="w-8 h-8 text-ls-red animate-pulse" />
             )}
           </div>
         </div>
 
         {/* Status Text */}
-        <h2 className="text-2xl font-bold text-white mb-2">
+        <h2 className="text-2xl font-bold text-ls-text mb-2">
           {error ? 'Generation Failed' : progress === 100 ? 'Ideas Ready!' : 'Generating Ideas'}
         </h2>
         {error ? (
           <div className="mb-8">
-            <p className="text-red-400 text-sm mb-4">{error}</p>
+            <p className="text-ls-red text-sm mb-4">{error}</p>
             <button
               onClick={goBack}
-              className="px-6 py-2 rounded-lg bg-white/10 text-white text-sm hover:bg-white/20 transition-colors"
+              className="px-6 py-2 rounded-full bg-ls-bg-secondary text-ls-text text-sm hover:bg-ls-bg-hover border border-ls-border transition-colors"
             >
               Go Back &amp; Retry
             </button>
           </div>
         ) : (
-          <p className="text-gray-400 mb-8 h-6 transition-all">
+          <p className="text-ls-text-secondary mb-8 h-6 transition-all">
             {statusText}
           </p>
         )}
 
         {/* Progress Bar */}
-        <div className="w-full h-1.5 bg-ls-dark-border rounded-full mb-8 overflow-hidden">
+        <div className="w-full h-1.5 bg-ls-border rounded-full mb-8 overflow-hidden">
           <div
-            className="h-full bg-gradient-to-r from-ls-accent to-ls-teal rounded-full transition-all duration-500"
+            className="h-full bg-gradient-to-r from-ls-red to-ls-red-dark rounded-full transition-all duration-500"
             style={{ width: `${progress}%` }}
           />
         </div>
 
         {/* Idea counter */}
         {totalIdeasSoFar > 0 && !error && (
-          <p className="text-xs text-gray-500 mb-4">
+          <p className="text-xs text-ls-text-secondary mb-4">
             {totalIdeasSoFar} idea{totalIdeasSoFar !== 1 ? 's' : ''} collected so far
           </p>
         )}
@@ -207,23 +202,23 @@ export function LoadingScreen() {
             return (
               <div
                 key={key}
-                className={`p-3 rounded-xl border transition-all ${
+                className={`p-3 rounded-2xl border transition-all ${
                   info.status === 'done'
-                    ? 'bg-ls-dark-card border-emerald-500/20'
+                    ? 'bg-ls-teal-light border-ls-teal/20'
                     : info.status === 'error'
-                    ? 'bg-ls-dark-card border-red-500/20'
+                    ? 'bg-ls-red-light border-ls-red/20'
                     : info.status === 'active'
-                    ? 'bg-ls-dark-card border-ls-dark-border animate-pulse'
-                    : 'bg-ls-dark border-ls-dark-border opacity-50'
+                    ? 'bg-white border-ls-border animate-pulse'
+                    : 'bg-ls-bg-secondary border-ls-border opacity-50'
                 }`}
               >
                 <div className="flex items-center justify-center gap-1.5 mb-1">
                   <div
                     className={`w-2 h-2 rounded-full ${
                       info.status === 'done'
-                        ? 'bg-emerald-400'
+                        ? 'bg-ls-teal'
                         : info.status === 'error'
-                        ? 'bg-red-400'
+                        ? 'bg-ls-red'
                         : info.status === 'active'
                         ? 'animate-pulse'
                         : ''
@@ -237,17 +232,17 @@ export function LoadingScreen() {
                           : model.color,
                     }}
                   />
-                  <span className="text-xs font-medium text-gray-300">{model.name}</span>
+                  <span className="text-xs font-medium text-ls-text">{model.name}</span>
                 </div>
-                <p className="text-xs text-gray-500">{model.lens}</p>
+                <p className="text-xs text-ls-text-secondary">{model.lens}</p>
                 {info.status === 'done' ? (
-                  <p className="text-xs mt-1 font-medium text-emerald-400">
+                  <p className="text-xs mt-1 font-medium text-ls-teal">
                     {info.ideaCount} ideas
                   </p>
                 ) : info.status === 'error' ? (
                   <div className="flex items-center justify-center gap-1 mt-1">
-                    <AlertCircle className="w-3 h-3 text-red-400" />
-                    <p className="text-xs font-medium text-red-400 truncate" title={info.error}>
+                    <AlertCircle className="w-3 h-3 text-ls-red" />
+                    <p className="text-xs font-medium text-ls-red truncate" title={info.error}>
                       Failed
                     </p>
                   </div>

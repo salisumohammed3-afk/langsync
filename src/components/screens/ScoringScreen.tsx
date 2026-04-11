@@ -84,21 +84,21 @@ export function ScoringScreen() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-6">
+    <div className="min-h-screen flex items-center justify-center p-6 bg-white">
       <div className="w-full max-w-2xl animate-fade-in">
         {/* Header */}
         <div className="mb-10">
           <button
             onClick={goBack}
-            className="flex items-center gap-1 text-sm text-gray-400 hover:text-white transition-colors mb-6"
+            className="flex items-center gap-1 text-sm text-ls-text-secondary hover:text-ls-text transition-colors mb-6"
           >
             <ArrowLeft className="w-4 h-4" />
             Back
           </button>
-          <h2 className="text-3xl font-bold text-white mb-2">
+          <h2 className="text-3xl font-bold text-ls-text mb-2">
             Rate <span className="gradient-text">{analysis?.company_name || 'your product'}</span> today
           </h2>
-          <p className="text-gray-400">
+          <p className="text-ls-text-secondary">
             Score each dimension 1–10. This establishes your baseline — the starting point for everything above.
           </p>
         </div>
@@ -109,7 +109,7 @@ export function ScoringScreen() {
             <div
               key={key}
               className={`flex-1 h-1 rounded-full transition-all ${
-                scores[key] !== undefined ? 'bg-ls-accent' : 'bg-ls-dark-border'
+                scores[key] !== undefined ? 'bg-ls-red' : 'bg-ls-border'
               }`}
             />
           ))}
@@ -131,25 +131,25 @@ export function ScoringScreen() {
               >
                 <div className="flex items-baseline justify-between mb-2">
                   <div className="flex items-center gap-2">
-                    <h3 className="text-base font-semibold text-white">{dim.label}</h3>
+                    <h3 className="text-base font-semibold text-ls-text">{dim.label}</h3>
                     <div className="relative group">
-                      <Info className="w-3.5 h-3.5 text-gray-600 cursor-help" />
-                      <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-64 p-3 rounded-lg bg-ls-dark-lighter border border-ls-dark-border text-xs text-gray-400 opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-20 shadow-xl">
-                        <p className="font-medium text-gray-300 mb-1">{dim.label}</p>
+                      <Info className="w-3.5 h-3.5 text-ls-text-muted cursor-help" />
+                      <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-64 p-3 rounded-xl bg-white border border-ls-border text-xs text-ls-text-secondary opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-20 shadow-lg">
+                        <p className="font-medium text-ls-text mb-1">{dim.label}</p>
                         <p>{dim.description}</p>
                       </div>
                     </div>
                   </div>
                   <span
                     className="text-2xl font-bold tabular-nums"
-                    style={{ color: score <= 3 ? '#F87171' : score <= 6 ? '#F59E0B' : '#A3E635' }}
+                    style={{ color: score <= 3 ? '#FF385C' : score <= 6 ? '#E07912' : '#008489' }}
                   >
                     {score}
                   </span>
                 </div>
 
                 {/* Benchmark hint */}
-                <div className={`text-xs text-gray-500 mb-2 h-5 transition-all ${isHovered || scores[key] !== undefined ? 'opacity-100' : 'opacity-0'}`}>
+                <div className={`text-xs text-ls-text-secondary mb-2 h-5 transition-all ${isHovered || scores[key] !== undefined ? 'opacity-100' : 'opacity-0'}`}>
                   {benchmark}
                 </div>
 
@@ -164,8 +164,8 @@ export function ScoringScreen() {
                     className="w-full"
                   />
                   <div className="flex justify-between mt-1">
-                    <span className="text-xs text-gray-600">1</span>
-                    <span className="text-xs text-gray-600">10</span>
+                    <span className="text-xs text-ls-text-muted">1</span>
+                    <span className="text-xs text-ls-text-muted">10</span>
                   </div>
                 </div>
               </div>
@@ -175,16 +175,16 @@ export function ScoringScreen() {
 
         {/* Score-to-Tier Mapping */}
         {allScored && tierMapping && (
-          <div className="mb-8 p-5 rounded-xl bg-ls-dark-card border border-ls-dark-border animate-slide-up">
+          <div className="mb-8 p-5 rounded-2xl bg-ls-bg-secondary border border-ls-border animate-slide-up">
             <div className="flex items-center justify-between mb-3">
-              <span className="text-sm text-gray-400">Overall Average</span>
+              <span className="text-sm text-ls-text-secondary">Overall Average</span>
               <span className="text-xl font-bold gradient-text">
                 {avgScore.toFixed(1)}
               </span>
             </div>
 
             {/* Star tier recommendation */}
-            <div className="flex items-center gap-3 p-3 rounded-lg bg-white/[0.02] border border-white/5">
+            <div className="flex items-center gap-3 p-3 rounded-xl bg-white border border-ls-border">
               <div className="flex items-center gap-1">
                 {([6, 7, 8, 9] as StarLevel[]).map((level) => {
                   const tier = STAR_TIERS[level];
@@ -199,7 +199,7 @@ export function ScoringScreen() {
                   );
                 })}
               </div>
-              <p className="text-xs text-gray-400 flex-1">{tierMapping.emphasis}</p>
+              <p className="text-xs text-ls-text-secondary flex-1">{tierMapping.emphasis}</p>
             </div>
           </div>
         )}
@@ -210,8 +210,8 @@ export function ScoringScreen() {
           disabled={!allScored}
           className={`w-full flex items-center justify-center gap-2 py-4 rounded-xl text-base font-semibold transition-all ${
             allScored
-              ? 'bg-gradient-to-r from-ls-accent to-ls-teal text-ls-dark hover:shadow-lg hover:shadow-ls-accent/20 hover:scale-[1.01]'
-              : 'bg-ls-dark-card text-gray-500 border border-ls-dark-border cursor-not-allowed'
+              ? 'bg-gradient-to-r from-ls-red to-ls-red-dark text-white hover:shadow-lg hover:shadow-ls-red/20 hover:scale-[1.01]'
+              : 'bg-ls-bg-secondary text-ls-text-muted border border-ls-border cursor-not-allowed'
           }`}
         >
           Continue to Persona Panel

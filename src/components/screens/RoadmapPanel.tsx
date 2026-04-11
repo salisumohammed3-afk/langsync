@@ -19,9 +19,9 @@ import {
 type PhaseTag = 'quick-win' | 'strategic' | 'moonshot';
 
 const PHASE_CONFIG: Record<PhaseTag, { label: string; icon: typeof Zap; color: string }> = {
-  'quick-win': { label: 'Quick Wins', icon: Zap, color: '#2DD4BF' },
-  strategic: { label: 'Strategic', icon: Target, color: '#F59E0B' },
-  moonshot: { label: 'Moonshots', icon: Rocket, color: '#F87171' },
+  'quick-win': { label: 'Quick Wins', icon: Zap, color: '#008489' },
+  strategic: { label: 'Strategic', icon: Target, color: '#E07912' },
+  moonshot: { label: 'Moonshots', icon: Rocket, color: '#FF385C' },
 };
 
 function getAutoPhase(starLevel: number): PhaseTag {
@@ -143,21 +143,21 @@ export function RoadmapPanel() {
         onDragOver={(e) => handleDragOver(e, idx)}
         onDrop={() => handleDrop(idx)}
         onDragEnd={handleDragEnd}
-        className={`flex items-start gap-2 p-3 rounded-lg bg-ls-dark-card border transition-all group cursor-move ${
+        className={`flex items-start gap-2 p-3 rounded-xl bg-white border transition-all group cursor-move ${
           isDragging
-            ? 'opacity-50 border-ls-accent/30'
+            ? 'opacity-50 border-ls-red/30'
             : isDragOver
-            ? 'border-ls-accent/50 bg-ls-accent/5'
-            : 'border-ls-dark-border'
+            ? 'border-ls-red/50 bg-ls-red-light'
+            : 'border-ls-border hover:shadow-sm'
         }`}
       >
-        <GripVertical className="w-4 h-4 text-gray-600 flex-shrink-0 mt-0.5 opacity-0 group-hover:opacity-100 transition-opacity" />
+        <GripVertical className="w-4 h-4 text-ls-text-muted flex-shrink-0 mt-0.5 opacity-0 group-hover:opacity-100 transition-opacity" />
         <div
           className="w-1 h-full min-h-[2rem] rounded-full flex-shrink-0"
           style={{ backgroundColor: tier.color }}
         />
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium text-white truncate">
+          <p className="text-sm font-medium text-ls-text truncate">
             {item.idea.title}
           </p>
           <div className="flex items-center gap-1.5 mt-1">
@@ -165,18 +165,18 @@ export function RoadmapPanel() {
               className="w-1.5 h-1.5 rounded-full"
               style={{ backgroundColor: model.color }}
             />
-            <span className="text-xs text-gray-500">
+            <span className="text-xs text-ls-text-secondary">
               {model.name}
             </span>
-            <span className="text-xs text-gray-600">·</span>
-            <span className="text-xs text-gray-500">
+            <span className="text-xs text-ls-text-muted">·</span>
+            <span className="text-xs text-ls-text-secondary">
               {item.idea.star_level}★
             </span>
           </div>
         </div>
         <button
           onClick={() => removeFromRoadmap(item.idea_id)}
-          className="p-1 rounded text-gray-600 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all flex-shrink-0"
+          className="p-1 rounded text-ls-text-muted hover:text-ls-red opacity-0 group-hover:opacity-100 transition-all flex-shrink-0"
         >
           <Trash2 className="w-3.5 h-3.5" />
         </button>
@@ -193,13 +193,13 @@ export function RoadmapPanel() {
       />
 
       {/* Panel */}
-      <div className="fixed right-0 top-0 h-full w-full max-w-md bg-ls-dark border-l border-ls-dark-border z-40 animate-slide-in-right flex flex-col">
+      <div className="fixed right-0 top-0 h-full w-full max-w-md bg-white border-l border-ls-border z-40 animate-slide-in-right flex flex-col shadow-2xl">
         {/* Header */}
-        <div className="flex items-center justify-between p-5 border-b border-ls-dark-border">
+        <div className="flex items-center justify-between p-5 border-b border-ls-border">
           <div className="flex items-center gap-2">
-            <Map className="w-5 h-5 text-ls-accent" />
-            <h2 className="text-lg font-bold text-white">Roadmap</h2>
-            <span className="text-sm text-gray-500">
+            <Map className="w-5 h-5 text-ls-red" />
+            <h2 className="text-lg font-bold text-ls-text">Roadmap</h2>
+            <span className="text-sm text-ls-text-secondary">
               ({roadmapItems.length} items)
             </span>
           </div>
@@ -207,7 +207,7 @@ export function RoadmapPanel() {
             {roadmapItems.length > 0 && (
               <button
                 onClick={handleExportMarkdown}
-                className="p-2 rounded-lg text-gray-400 hover:text-white hover:bg-ls-dark-card transition-all"
+                className="p-2 rounded-full text-ls-text-secondary hover:text-ls-text hover:bg-ls-bg-secondary transition-all"
                 title="Export as Markdown"
               >
                 <Download className="w-4 h-4" />
@@ -215,7 +215,7 @@ export function RoadmapPanel() {
             )}
             <button
               onClick={toggleRoadmap}
-              className="p-2 rounded-lg text-gray-400 hover:text-white hover:bg-ls-dark-card transition-all"
+              className="p-2 rounded-full text-ls-text-secondary hover:text-ls-text hover:bg-ls-bg-secondary transition-all"
             >
               <X className="w-5 h-5" />
             </button>
@@ -224,19 +224,19 @@ export function RoadmapPanel() {
 
         {/* View Mode Toggle */}
         {roadmapItems.length > 0 && (
-          <div className="flex gap-1 p-3 mx-5 mt-3 bg-ls-dark-card rounded-lg border border-ls-dark-border">
+          <div className="flex gap-1 p-1 mx-5 mt-3 bg-ls-bg-secondary rounded-full border border-ls-border">
             <button
               onClick={() => setViewMode('phase')}
-              className={`flex-1 text-xs py-1.5 rounded transition-all ${
-                viewMode === 'phase' ? 'bg-white/10 text-white' : 'text-gray-500 hover:text-gray-300'
+              className={`flex-1 text-xs py-1.5 rounded-full transition-all ${
+                viewMode === 'phase' ? 'bg-white text-ls-text shadow-sm' : 'text-ls-text-secondary hover:text-ls-text'
               }`}
             >
               By Phase
             </button>
             <button
               onClick={() => setViewMode('tier')}
-              className={`flex-1 text-xs py-1.5 rounded transition-all ${
-                viewMode === 'tier' ? 'bg-white/10 text-white' : 'text-gray-500 hover:text-gray-300'
+              className={`flex-1 text-xs py-1.5 rounded-full transition-all ${
+                viewMode === 'tier' ? 'bg-white text-ls-text shadow-sm' : 'text-ls-text-secondary hover:text-ls-text'
               }`}
             >
               By Star Tier
@@ -248,9 +248,9 @@ export function RoadmapPanel() {
         <div className="flex-1 overflow-y-auto p-5">
           {roadmapItems.length === 0 ? (
             <div className="text-center py-16">
-              <Map className="w-12 h-12 text-gray-600 mx-auto mb-4" />
-              <p className="text-gray-400 mb-2">No ideas selected yet</p>
-              <p className="text-sm text-gray-500">
+              <Map className="w-12 h-12 text-ls-text-muted mx-auto mb-4" />
+              <p className="text-ls-text-secondary mb-2">No ideas selected yet</p>
+              <p className="text-sm text-ls-text-muted">
                 Click the + button on any idea card to add it to your roadmap.
               </p>
             </div>
@@ -268,7 +268,7 @@ export function RoadmapPanel() {
                       <h3 className="text-sm font-semibold" style={{ color: config.color }}>
                         {config.label}
                       </h3>
-                      <span className="text-xs text-gray-600">({items.length})</span>
+                      <span className="text-xs text-ls-text-muted">({items.length})</span>
                     </div>
                     <div className="space-y-2">
                       {items.map((item) => renderItem(item, roadmapItems.indexOf(item)))}
@@ -310,7 +310,7 @@ export function RoadmapPanel() {
 
         {/* Footer Summary */}
         {roadmapItems.length > 0 && (
-          <div className="p-5 border-t border-ls-dark-border space-y-3">
+          <div className="p-5 border-t border-ls-border space-y-3">
             {/* Phase summary */}
             <div className="flex gap-3 justify-center">
               {(['quick-win', 'strategic', 'moonshot'] as PhaseTag[]).map((phase) => {
@@ -320,7 +320,7 @@ export function RoadmapPanel() {
                 return (
                   <div key={phase} className="flex items-center gap-1.5">
                     <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: config.color }} />
-                    <span className="text-xs text-gray-500">
+                    <span className="text-xs text-ls-text-secondary">
                       {count} {config.label.toLowerCase()}
                     </span>
                   </div>
@@ -329,7 +329,7 @@ export function RoadmapPanel() {
             </div>
             <button
               onClick={handleExportMarkdown}
-              className="w-full py-2.5 rounded-lg bg-gradient-to-r from-ls-accent to-ls-teal text-ls-dark text-sm font-semibold hover:shadow-lg hover:shadow-ls-accent/20 transition-all"
+              className="w-full py-2.5 rounded-full bg-gradient-to-r from-ls-red to-ls-red-dark text-white text-sm font-semibold hover:shadow-lg hover:shadow-ls-red/20 transition-all"
             >
               Export Roadmap as Markdown
             </button>

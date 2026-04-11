@@ -47,10 +47,10 @@ function ModelDot({ model }: { model: string }) {
 function ConfidenceBadge({ confidence }: { confidence: string }) {
   const styles =
     confidence === 'novel'
-      ? 'bg-purple-500/10 text-purple-400 ring-purple-500/20'
+      ? 'bg-purple-50 text-purple-600 ring-purple-200'
       : confidence === 'feasible'
-      ? 'bg-emerald-500/10 text-emerald-400 ring-emerald-500/20'
-      : 'bg-amber-500/10 text-amber-400 ring-amber-500/20';
+      ? 'bg-emerald-50 text-emerald-600 ring-emerald-200'
+      : 'bg-amber-50 text-amber-600 ring-amber-200';
   return (
     <span className={`text-xs px-2 py-0.5 rounded-full ring-1 ${styles}`}>
       {confidence}
@@ -141,10 +141,10 @@ function IdeaCard({ idea }: { idea: Idea }) {
 
   return (
     <div
-      className={`rounded-xl border transition-all ${
+      className={`rounded-2xl border transition-all ${
         isExpanded
-          ? 'bg-ls-dark-lighter border-white/10 shadow-lg'
-          : 'bg-ls-dark-card border-ls-dark-border hover:border-white/10'
+          ? 'bg-white border-ls-border-dark shadow-lg'
+          : 'bg-white border-ls-border hover:shadow-md'
       }`}
     >
       {/* Card Header */}
@@ -153,13 +153,13 @@ function IdeaCard({ idea }: { idea: Idea }) {
         onClick={handleExpand}
       >
         <div className="flex items-start justify-between gap-4 mb-3">
-          <h3 className="text-base font-semibold text-white flex-1">
+          <h3 className="text-base font-semibold text-ls-text flex-1">
             {idea.title}
           </h3>
           <div className="flex items-center gap-2 flex-shrink-0">
             <button
               onClick={handleExportIdea}
-              className="p-1.5 rounded-lg bg-ls-dark-border/50 text-gray-500 hover:text-gray-300 transition-all"
+              className="p-1.5 rounded-lg bg-ls-bg-secondary text-ls-text-muted hover:text-ls-text transition-all"
               title="Export as Markdown"
             >
               <Download className="w-4 h-4" />
@@ -168,22 +168,22 @@ function IdeaCard({ idea }: { idea: Idea }) {
               onClick={handleRoadmapToggle}
               className={`p-1.5 rounded-lg transition-all ${
                 isInRoadmap
-                  ? 'bg-ls-accent/20 text-ls-accent'
-                  : 'bg-ls-dark-border/50 text-gray-500 hover:text-gray-300'
+                  ? 'bg-ls-red-light text-ls-red'
+                  : 'bg-ls-bg-secondary text-ls-text-muted hover:text-ls-text'
               }`}
               title={isInRoadmap ? 'Remove from roadmap' : 'Add to roadmap'}
             >
               {isInRoadmap ? <Check className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
             </button>
             {isExpanded ? (
-              <ChevronUp className="w-4 h-4 text-gray-400" />
+              <ChevronUp className="w-4 h-4 text-ls-text-secondary" />
             ) : (
-              <ChevronDown className="w-4 h-4 text-gray-400" />
+              <ChevronDown className="w-4 h-4 text-ls-text-secondary" />
             )}
           </div>
         </div>
 
-        <p className="text-sm text-gray-400 mb-4 leading-relaxed">
+        <p className="text-sm text-ls-text-secondary mb-4 leading-relaxed">
           {idea.description}
         </p>
 
@@ -192,13 +192,13 @@ function IdeaCard({ idea }: { idea: Idea }) {
           {/* Model attribution */}
           <div className="flex items-center gap-1.5">
             <ModelDot model={idea.model_source} />
-            <span className="text-xs text-gray-500">
+            <span className="text-xs text-ls-text-secondary">
               {model.name} · {model.lens}
             </span>
           </div>
 
           {/* Dimension tag */}
-          <span className="text-xs px-2 py-0.5 rounded-full bg-white/5 text-gray-400 ring-1 ring-white/5">
+          <span className="text-xs px-2 py-0.5 rounded-full bg-ls-bg-secondary text-ls-text-secondary ring-1 ring-ls-border">
             {dimension.label}
           </span>
 
@@ -208,10 +208,10 @@ function IdeaCard({ idea }: { idea: Idea }) {
           {/* Why this tier tooltip */}
           <div className="relative group">
             <div className="flex items-center gap-1 cursor-help">
-              <Info className="w-3 h-3 text-gray-600" />
-              <span className="text-xs text-gray-600">Why {idea.star_level}-star?</span>
+              <Info className="w-3 h-3 text-ls-text-muted" />
+              <span className="text-xs text-ls-text-muted">Why {idea.star_level}-star?</span>
             </div>
-            <div className="absolute left-0 bottom-full mb-2 w-72 p-3 rounded-lg bg-ls-dark-lighter border border-ls-dark-border text-xs text-gray-400 opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-30 shadow-xl">
+            <div className="absolute left-0 bottom-full mb-2 w-72 p-3 rounded-xl bg-white border border-ls-border text-xs text-ls-text-secondary opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-30 shadow-lg">
               {TIER_REASONS[idea.star_level]}
             </div>
           </div>
@@ -220,19 +220,19 @@ function IdeaCard({ idea }: { idea: Idea }) {
 
       {/* Loading Detail */}
       {isExpanded && loadingDetail && !detail && (
-        <div className="border-t border-ls-dark-border p-8 flex items-center justify-center gap-3">
-          <Loader2 className="w-5 h-5 text-ls-accent animate-spin" />
-          <span className="text-sm text-gray-400">Generating detailed analysis with AI...</span>
+        <div className="border-t border-ls-border p-8 flex items-center justify-center gap-3">
+          <Loader2 className="w-5 h-5 text-ls-red animate-spin" />
+          <span className="text-sm text-ls-text-secondary">Generating detailed analysis with AI...</span>
         </div>
       )}
 
       {/* Expanded Detail */}
       {isExpanded && detail && (
-        <div className="border-t border-ls-dark-border animate-slide-up">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-0 md:divide-x md:divide-ls-dark-border">
+        <div className="border-t border-ls-border animate-slide-up">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-0 md:divide-x md:divide-ls-border">
             {/* What It Takes */}
             <div className="p-5">
-              <h4 className="text-sm font-semibold text-white mb-3 flex items-center gap-2">
+              <h4 className="text-sm font-semibold text-ls-text mb-3 flex items-center gap-2">
                 <span
                   className="w-1.5 h-1.5 rounded-full"
                   style={{ backgroundColor: tier.color }}
@@ -243,9 +243,9 @@ function IdeaCard({ idea }: { idea: Idea }) {
             </div>
 
             {/* Regression Version */}
-            <div className="p-5 border-t border-ls-dark-border md:border-t-0">
-              <h4 className="text-sm font-semibold text-white mb-3 flex items-center gap-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-gray-400" />
+            <div className="p-5 border-t border-ls-border md:border-t-0">
+              <h4 className="text-sm font-semibold text-ls-text mb-3 flex items-center gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-ls-text-muted" />
                 Regression Version
               </h4>
               <Markdown text={detail.regression_version} />
@@ -298,48 +298,48 @@ export function ResultsScreen() {
     (sortMode !== 'default' ? 1 : 0);
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-ls-bg-secondary">
       {/* Top Bar */}
-      <div className="sticky top-0 z-20 bg-ls-dark/90 backdrop-blur-lg border-b border-ls-dark-border">
+      <div className="sticky top-0 z-20 bg-white/95 backdrop-blur-lg border-b border-ls-border">
         <div className="max-w-5xl mx-auto px-6 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <button
               onClick={goBack}
-              className="p-1.5 rounded-lg text-gray-400 hover:text-white hover:bg-ls-dark-card transition-all"
+              className="p-1.5 rounded-full text-ls-text-secondary hover:text-ls-text hover:bg-ls-bg-secondary transition-all"
             >
               <ArrowLeft className="w-4 h-4" />
             </button>
             <div>
-              <h1 className="text-sm font-semibold text-white">{analysis?.company_name}</h1>
-              <p className="text-xs text-gray-500">{ideas.length} ideas generated</p>
+              <h1 className="text-sm font-semibold text-ls-text">{analysis?.company_name}</h1>
+              <p className="text-xs text-ls-text-secondary">{ideas.length} ideas generated</p>
             </div>
           </div>
 
           <div className="flex items-center gap-2">
             <button
               onClick={() => setShowFilters(!showFilters)}
-              className={`flex items-center gap-1.5 px-3 py-2 rounded-lg border text-sm transition-all ${
+              className={`flex items-center gap-1.5 px-3 py-2 rounded-full border text-sm transition-all ${
                 showFilters || activeFilterCount > 0
-                  ? 'bg-ls-accent/10 border-ls-accent/20 text-ls-accent'
-                  : 'bg-ls-dark-card border-ls-dark-border text-gray-300 hover:text-white hover:border-white/10'
+                  ? 'bg-ls-red-light border-ls-red/20 text-ls-red'
+                  : 'bg-white border-ls-border text-ls-text hover:bg-ls-bg-secondary'
               }`}
             >
               <Filter className="w-4 h-4" />
               Filter
               {activeFilterCount > 0 && (
-                <span className="px-1.5 py-0.5 text-xs font-semibold bg-ls-accent/20 text-ls-accent rounded-full">
+                <span className="px-1.5 py-0.5 text-xs font-semibold bg-ls-red text-white rounded-full">
                   {activeFilterCount}
                 </span>
               )}
             </button>
             <button
               onClick={toggleRoadmap}
-              className="flex items-center gap-2 px-3 py-2 rounded-lg bg-ls-dark-card border border-ls-dark-border text-sm text-gray-300 hover:text-white hover:border-white/10 transition-all"
+              className="flex items-center gap-2 px-3 py-2 rounded-full bg-white border border-ls-border text-sm text-ls-text hover:bg-ls-bg-secondary transition-all"
             >
               <Map className="w-4 h-4" />
               Roadmap
               {roadmapItems.length > 0 && (
-                <span className="ml-1 px-1.5 py-0.5 text-xs font-semibold bg-ls-accent/20 text-ls-accent rounded-full">
+                <span className="ml-1 px-1.5 py-0.5 text-xs font-semibold bg-ls-red text-white rounded-full">
                   {roadmapItems.length}
                 </span>
               )}
@@ -350,15 +350,15 @@ export function ResultsScreen() {
         {/* Filter Bar */}
         {showFilters && (
           <div className="max-w-5xl mx-auto px-6 pb-3 animate-slide-up">
-            <div className="flex flex-wrap gap-3 p-3 rounded-lg bg-ls-dark-card border border-ls-dark-border">
+            <div className="flex flex-wrap gap-3 p-3 rounded-xl bg-white border border-ls-border">
               {/* Model Filter */}
               <div className="flex items-center gap-2">
-                <span className="text-xs text-gray-500">Model:</span>
+                <span className="text-xs text-ls-text-secondary">Model:</span>
                 <div className="flex gap-1">
                   <button
                     onClick={() => setModelFilter('all')}
-                    className={`px-2 py-1 rounded text-xs transition-all ${
-                      modelFilter === 'all' ? 'bg-white/10 text-white' : 'text-gray-500 hover:text-gray-300'
+                    className={`px-2.5 py-1 rounded-full text-xs transition-all ${
+                      modelFilter === 'all' ? 'bg-ls-text text-white' : 'text-ls-text-secondary hover:text-ls-text'
                     }`}
                   >
                     All
@@ -367,8 +367,8 @@ export function ResultsScreen() {
                     <button
                       key={key}
                       onClick={() => setModelFilter(modelFilter === key ? 'all' : key)}
-                      className={`flex items-center gap-1 px-2 py-1 rounded text-xs transition-all ${
-                        modelFilter === key ? 'bg-white/10 text-white' : 'text-gray-500 hover:text-gray-300'
+                      className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-xs transition-all ${
+                        modelFilter === key ? 'bg-ls-text text-white' : 'text-ls-text-secondary hover:text-ls-text'
                       }`}
                     >
                       <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: MODELS[key].color }} />
@@ -380,11 +380,11 @@ export function ResultsScreen() {
 
               {/* Dimension Filter */}
               <div className="flex items-center gap-2">
-                <span className="text-xs text-gray-500">Dimension:</span>
+                <span className="text-xs text-ls-text-secondary">Dimension:</span>
                 <select
                   value={dimensionFilter}
                   onChange={(e) => setDimensionFilter(e.target.value as DimensionKey | 'all')}
-                  className="px-2 py-1 rounded text-xs bg-ls-dark border border-ls-dark-border text-gray-300 focus:outline-none"
+                  className="px-2.5 py-1 rounded-full text-xs bg-white border border-ls-border text-ls-text focus:outline-none focus:ring-1 focus:ring-ls-red/20"
                 >
                   <option value="all">All</option>
                   {DIMENSION_KEYS.map((key) => (
@@ -395,11 +395,11 @@ export function ResultsScreen() {
 
               {/* Sort */}
               <div className="flex items-center gap-2">
-                <ArrowUpDown className="w-3 h-3 text-gray-500" />
+                <ArrowUpDown className="w-3 h-3 text-ls-text-secondary" />
                 <select
                   value={sortMode}
                   onChange={(e) => setSortMode(e.target.value as SortMode)}
-                  className="px-2 py-1 rounded text-xs bg-ls-dark border border-ls-dark-border text-gray-300 focus:outline-none"
+                  className="px-2.5 py-1 rounded-full text-xs bg-white border border-ls-border text-ls-text focus:outline-none focus:ring-1 focus:ring-ls-red/20"
                 >
                   <option value="default">Default order</option>
                   <option value="dimension_relevance">Weakest dimensions first</option>
@@ -411,7 +411,7 @@ export function ResultsScreen() {
               {activeFilterCount > 0 && (
                 <button
                   onClick={() => { setModelFilter('all'); setDimensionFilter('all'); setSortMode('default'); }}
-                  className="text-xs text-gray-500 hover:text-white px-2 py-1 transition-colors"
+                  className="text-xs text-ls-text-secondary hover:text-ls-red px-2 py-1 transition-colors"
                 >
                   Clear all
                 </button>
@@ -422,8 +422,8 @@ export function ResultsScreen() {
       </div>
 
       <div className="max-w-5xl mx-auto px-6 py-8">
-        {/* Star Level Tabs */}
-        <div className="flex gap-2 mb-8 p-1 bg-ls-dark-card rounded-xl border border-ls-dark-border">
+        {/* Star Level Tabs — Airbnb pill style */}
+        <div className="flex gap-2 mb-8 p-1.5 bg-white rounded-full border border-ls-border shadow-sm">
           {TIER_KEYS.map((level) => {
             const t = STAR_TIERS[level];
             const count = ideas.filter((i) => i.star_level === level).length;
@@ -432,10 +432,10 @@ export function ResultsScreen() {
               <button
                 key={level}
                 onClick={() => setActiveTab(level)}
-                className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-lg text-sm font-medium transition-all ${
+                className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-full text-sm font-medium transition-all ${
                   isActive
-                    ? 'bg-ls-dark-lighter text-white shadow-lg'
-                    : 'text-gray-400 hover:text-gray-300'
+                    ? 'bg-ls-text text-white shadow-md'
+                    : 'text-ls-text-secondary hover:text-ls-text'
                 }`}
               >
                 <Star
@@ -444,7 +444,7 @@ export function ResultsScreen() {
                   fill={isActive ? t.color : 'none'}
                 />
                 <span>{level}-Star</span>
-                <span className="text-xs text-gray-500">({count})</span>
+                <span className={`text-xs ${isActive ? 'text-white/70' : 'text-ls-text-muted'}`}>({count})</span>
               </button>
             );
           })}
@@ -456,11 +456,11 @@ export function ResultsScreen() {
             <h2 className="text-2xl font-bold" style={{ color: tier.color }}>
               {tier.label}
             </h2>
-            <span className="text-sm text-gray-500">
+            <span className="text-sm text-ls-text-secondary">
               {activeTab}-Star Experience
             </span>
           </div>
-          <p className="text-gray-400 text-sm">{tier.character}</p>
+          <p className="text-ls-text-secondary text-sm">{tier.character}</p>
         </div>
 
         {/* Model comparison summary */}
@@ -472,10 +472,10 @@ export function ResultsScreen() {
               <button
                 key={key}
                 onClick={() => setModelFilter(modelFilter === key ? 'all' : key)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs transition-all ${
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs transition-all ${
                   modelFilter === key
-                    ? 'bg-white/10 text-white ring-1 ring-white/10'
-                    : 'bg-ls-dark-card border border-ls-dark-border text-gray-400 hover:text-white'
+                    ? 'bg-ls-text text-white'
+                    : 'bg-white border border-ls-border text-ls-text-secondary hover:text-ls-text'
                 }`}
               >
                 <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: MODELS[key].color }} />
@@ -494,7 +494,7 @@ export function ResultsScreen() {
 
         {filteredIdeas.length === 0 && (
           <div className="text-center py-16">
-            <p className="text-gray-500 mb-2">
+            <p className="text-ls-text-secondary mb-2">
               {ideas.filter((i) => i.star_level === activeTab).length > 0
                 ? 'No ideas match the current filters.'
                 : 'No ideas generated for this tier.'}
@@ -502,7 +502,7 @@ export function ResultsScreen() {
             {activeFilterCount > 0 && (
               <button
                 onClick={() => { setModelFilter('all'); setDimensionFilter('all'); setSortMode('default'); }}
-                className="text-sm text-ls-accent hover:underline"
+                className="text-sm text-ls-red hover:underline"
               >
                 Clear filters
               </button>
