@@ -1,9 +1,9 @@
 'use client';
 
+import { useState } from 'react';
 import { useAnalysisStore } from '@/store';
 import { STAR_TIERS, MODELS, DIMENSIONS } from '@/types';
-import type { StarLevel, Idea } from '@/types';
-import { generateMockIdeaDetail } from '@/lib/mock-data';
+import type { StarLevel, Idea, IdeaDetail } from '@/types';
 import {
   ArrowLeft,
   ChevronDown,
@@ -12,6 +12,7 @@ import {
   Check,
   Map,
   Star,
+  Loader2,
 } from 'lucide-react';
 import React from 'react';
 
@@ -53,6 +54,7 @@ function ConfidenceBadge({ confidence }: { confidence: string }) {
 
 function IdeaCard({ idea }: { idea: Idea }) {
   const {
+    analysis,
     expandedIdeaId,
     setExpandedIdea,
     ideaDetails,
@@ -62,6 +64,7 @@ function IdeaCard({ idea }: { idea: Idea }) {
     roadmapItems,
   } = useAnalysisStore();
 
+  const [loadingDetail, setLoadingDetail] = useState(false);
   const isExpanded = expandedIdeaId === idea.id;
   const detail = ideaDetails[idea.id];
   const isInRoadmap = roadmapItems.some((item) => item.idea_id === idea.id);
@@ -75,9 +78,28 @@ function IdeaCard({ idea }: { idea: Idea }) {
       return;
     }
     setExpandedIdea(idea.id);
-    if (!detail) {
-      const generated = generateMockIdeaDetail(idea);
-      setIdeaDetail(idea.id, generated);
+    if (!detail && !loadingDetail) {
+      setLoadingDetail(true);
+      fetch('/api/expand', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          idea,
+          company_name: analysis?.company_name ?? '',
+          description: analysis?.description ?? '',
+        }),
+      })
+        .then((res) => {
+          if (!res.ok) throw new Error('Expansion failed');
+          return res.json();
+        })
+        .then((data: IdeaDetail) => {
+          setIdeaDetail(idea.id, data);
+        })
+        .catch((err) => {
+          console.error('Idea expansion failed:', err);
+        })
+        .finally(() => setLoadingDetail(false));
     }
   };
 
@@ -150,6 +172,14 @@ function IdeaCard({ idea }: { idea: Idea }) {
           <ConfidenceBadge confidence={idea.confidence} />
         </div>
       </div>
+
+      {/* Loading Detail */}
+      {isExpanded && loadingDetail && !detail && (
+        <div className="border-t border-ls-dark-border p-8 flex items-center justify-center gap-3">
+          <Loader2 className="w-5 h-5 text-ls-accent animate-spin" />
+          <span className="text-sm text-gray-400">Generating detailed analysis with AI...</span>
+        </div>
+      )}
 
       {/* Expanded Detail */}
       {isExpanded && detail && (

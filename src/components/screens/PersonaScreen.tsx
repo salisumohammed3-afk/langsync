@@ -1,23 +1,46 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useAnalysisStore } from '@/store';
 import { DIMENSIONS } from '@/types';
-import type { DimensionKey } from '@/types';
-import { generateMockPersonas } from '@/lib/mock-data';
-import { ArrowLeft, ArrowRight, TrendingUp, TrendingDown, Minus } from 'lucide-react';
+import type { DimensionKey, Persona } from '@/types';
+import { ArrowLeft, ArrowRight, TrendingUp, TrendingDown, Minus, Loader2 } from 'lucide-react';
 
 const DIMENSION_KEYS = Object.keys(DIMENSIONS) as DimensionKey[];
 
 export function PersonaScreen() {
   const { analysis, scores, personas, setPersonas, setStep, goBack } = useAnalysisStore();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (personas.length === 0 && analysis) {
-      const generated = generateMockPersonas(analysis.id, scores);
-      setPersonas(generated);
+    if (personas.length === 0 && analysis && !loading) {
+      setLoading(true);
+      setError(null);
+      fetch('/api/personas', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          analysis_id: analysis.id,
+          company_name: analysis.company_name,
+          description: analysis.description,
+          scores,
+        }),
+      })
+        .then((res) => {
+          if (!res.ok) throw new Error('Persona generation failed');
+          return res.json();
+        })
+        .then((data: { personas: Persona[] }) => {
+          setPersonas(data.personas);
+        })
+        .catch((err) => {
+          console.error(err);
+          setError('Failed to generate personas. Please try again.');
+        })
+        .finally(() => setLoading(false));
     }
-  }, [analysis, scores, personas.length, setPersonas]);
+  }, [analysis, scores, personas.length, setPersonas, loading]);
 
   const handleContinue = () => {
     setStep('loading');
@@ -45,7 +68,31 @@ export function PersonaScreen() {
           </p>
         </div>
 
+        {/* Loading State */}
+        {loading && (
+          <div className="flex flex-col items-center justify-center py-20 animate-fade-in">
+            <Loader2 className="w-10 h-10 text-ls-accent animate-spin mb-4" />
+            <p className="text-gray-400 text-sm">Generating stakeholder personas with AI...</p>
+            <p className="text-gray-600 text-xs mt-1">This may take 10–15 seconds</p>
+          </div>
+        )}
+
+        {/* Error State */}
+        {error && (
+          <div className="flex flex-col items-center justify-center py-20 animate-fade-in">
+            <p className="text-red-400 text-sm mb-3">{error}</p>
+            <button
+              onClick={() => { setError(null); setPersonas([]); }}
+              className="px-4 py-2 rounded-lg bg-white/5 text-white text-sm hover:bg-white/10 transition-colors"
+            >
+              Retry
+            </button>
+          </div>
+        )}
+
         {/* Persona Grid */}
+        {!loading && !error && personas.length > 0 && (
+        <>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
           {personas.map((persona, idx) => (
             <div
@@ -134,6 +181,8 @@ export function PersonaScreen() {
           Generate Ideas Across All Models
           <ArrowRight className="w-5 h-5" />
         </button>
+        </>
+        )}
       </div>
     </div>
   );

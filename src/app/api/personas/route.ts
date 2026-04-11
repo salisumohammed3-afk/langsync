@@ -1,17 +1,12 @@
 import { NextResponse } from 'next/server';
-import { generateAllIdeas } from '@/lib/ai-service';
+import { generatePersonas } from '@/lib/ai-service';
 import type { DimensionKey } from '@/types';
 
-export const maxDuration = 60;
+export const maxDuration = 30;
 
 export async function POST(request: Request) {
   const body = await request.json();
-  const {
-    analysis_id,
-    company_name,
-    description,
-    scores,
-  } = body as {
+  const { analysis_id, company_name, description, scores } = body as {
     analysis_id: string;
     company_name: string;
     description: string;
@@ -26,12 +21,17 @@ export async function POST(request: Request) {
   }
 
   try {
-    const ideas = await generateAllIdeas(analysis_id, company_name, description, scores);
-    return NextResponse.json({ ideas });
+    const personas = await generatePersonas(
+      analysis_id,
+      company_name,
+      description || `${company_name} — a product being evaluated.`,
+      scores
+    );
+    return NextResponse.json({ personas });
   } catch (error) {
-    console.error('Idea generation failed:', error);
+    console.error('Persona generation failed:', error);
     return NextResponse.json(
-      { error: 'AI idea generation failed. Please check API keys and try again.' },
+      { error: 'AI persona generation failed. Please try again.' },
       { status: 500 }
     );
   }

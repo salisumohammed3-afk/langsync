@@ -1,27 +1,26 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useAnalysisStore } from '@/store';
 import { MODELS } from '@/types';
-import type { ModelSource } from '@/types';
-import { generateMockIdeas, generateMockResearch } from '@/lib/mock-data';
+import type { ModelSource, Idea } from '@/types';
 import { Sparkles } from 'lucide-react';
 
 const MODEL_KEYS: ModelSource[] = ['claude', 'chatgpt', 'gemini'];
 
 const PROGRESS_STEPS = [
-  'Researching company context...',
-  'Building stakeholder map...',
+  'Sending context to AI models...',
   'Claude: Scanning cross-industry patterns...',
   'ChatGPT: Removing all constraints...',
   'Gemini: Mapping emotional moments...',
-  'Deduplicating and organising ideas...',
-  'Calibrating tier assignments...',
-  'Finalising results...',
+  'Models are thinking...',
+  'Generating ideas across all tiers...',
+  'Organising and calibrating results...',
+  'Almost there...',
 ];
 
 export function LoadingScreen() {
-  const { analysis, setIdeas, setStep } = useAnalysisStore();
+  const { analysis, scores, setIdeas, setStep, goBack } = useAnalysisStore();
   const [currentStep, setCurrentStep] = useState(0);
   const [modelStatus, setModelStatus] = useState<Record<ModelSource, 'waiting' | 'active' | 'done'>>({
     claude: 'waiting',
@@ -29,9 +28,14 @@ export function LoadingScreen() {
     gemini: 'waiting',
   });
   const [progress, setProgress] = useState(0);
+  const [error, setError] = useState<string | null>(null);
+  const fetchStarted = useRef(false);
 
   useEffect(() => {
-    // Simulate progressive loading
+    if (!analysis || fetchStarted.current) return;
+    fetchStarted.current = true;
+
+    // Animate progress steps
     const stepInterval = setInterval(() => {
       setCurrentStep((prev) => {
         if (prev >= PROGRESS_STEPS.length - 1) {
@@ -40,46 +44,66 @@ export function LoadingScreen() {
         }
         return prev + 1;
       });
-    }, 800);
+    }, 3000);
 
-    // Simulate model status changes
+    // Animate model status (show active immediately since all 3 run in parallel)
     const timers = [
       setTimeout(() => setModelStatus((s) => ({ ...s, claude: 'active' })), 500),
-      setTimeout(() => setModelStatus((s) => ({ ...s, chatgpt: 'active' })), 800),
-      setTimeout(() => setModelStatus((s) => ({ ...s, gemini: 'active' })), 1100),
-      setTimeout(() => setModelStatus((s) => ({ ...s, claude: 'done' })), 3000),
-      setTimeout(() => setModelStatus((s) => ({ ...s, chatgpt: 'done' })), 3800),
-      setTimeout(() => setModelStatus((s) => ({ ...s, gemini: 'done' })), 4500),
+      setTimeout(() => setModelStatus((s) => ({ ...s, chatgpt: 'active' })), 1000),
+      setTimeout(() => setModelStatus((s) => ({ ...s, gemini: 'active' })), 1500),
     ];
 
-    // Progress bar
+    // Slow progress bar that fills to ~85% while waiting for API
     const progressInterval = setInterval(() => {
       setProgress((prev) => {
-        if (prev >= 100) {
+        if (prev >= 85) {
           clearInterval(progressInterval);
-          return 100;
+          return 85;
         }
-        return prev + 2;
+        return prev + 1;
       });
-    }, 100);
+    }, 400);
 
-    // Generate results and transition
-    const completeTimer = setTimeout(() => {
-      if (analysis) {
-        generateMockResearch(analysis.company_name, analysis.company_url);
-        const ideas = generateMockIdeas(analysis.id);
-        setIdeas(ideas);
-        setStep('results');
-      }
-    }, 5500);
+    // REAL API call
+    fetch('/api/analyze', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        analysis_id: analysis.id,
+        company_name: analysis.company_name,
+        description: analysis.description,
+        scores,
+      }),
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error('API call failed');
+        return res.json();
+      })
+      .then((data: { ideas: Idea[] }) => {
+        // Mark all models done and fill progress
+        setModelStatus({ claude: 'done', chatgpt: 'done', gemini: 'done' });
+        setProgress(100);
+        setCurrentStep(PROGRESS_STEPS.length - 1);
+
+        // Brief pause to show completion state, then transition
+        setTimeout(() => {
+          setIdeas(data.ideas);
+          setStep('results');
+        }, 800);
+      })
+      .catch((err) => {
+        console.error('Idea generation failed:', err);
+        setError('AI generation failed. Please go back and try again.');
+        clearInterval(progressInterval);
+        clearInterval(stepInterval);
+      });
 
     return () => {
       clearInterval(stepInterval);
       clearInterval(progressInterval);
       timers.forEach(clearTimeout);
-      clearTimeout(completeTimer);
     };
-  }, [analysis, setIdeas, setStep]);
+  }, [analysis, scores, setIdeas, setStep]);
 
   return (
     <div className="min-h-screen flex items-center justify-center p-6">
@@ -102,11 +126,23 @@ export function LoadingScreen() {
 
         {/* Status Text */}
         <h2 className="text-2xl font-bold text-white mb-2">
-          Generating Ideas
+          {error ? 'Generation Failed' : 'Generating Ideas'}
         </h2>
+        {error ? (
+          <div className="mb-8">
+            <p className="text-red-400 text-sm mb-4">{error}</p>
+            <button
+              onClick={goBack}
+              className="px-6 py-2 rounded-lg bg-white/10 text-white text-sm hover:bg-white/20 transition-colors"
+            >
+              Go Back &amp; Retry
+            </button>
+          </div>
+        ) : (
         <p className="text-gray-400 mb-8 h-6 transition-all">
           {PROGRESS_STEPS[currentStep]}
         </p>
+        )}
 
         {/* Progress Bar */}
         <div className="w-full h-1.5 bg-ls-dark-border rounded-full mb-8 overflow-hidden">
