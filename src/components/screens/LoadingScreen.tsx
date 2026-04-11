@@ -4,68 +4,39 @@ import { useEffect, useState, useRef } from 'react';
 import { useAnalysisStore } from '@/store';
 import { MODELS } from '@/types';
 import type { ModelSource, Idea } from '@/types';
-import { Sparkles } from 'lucide-react';
+import { Sparkles, AlertCircle } from 'lucide-react';
 
 const MODEL_KEYS: ModelSource[] = ['claude', 'chatgpt', 'gemini'];
 
-const PROGRESS_STEPS = [
-  'Sending context to AI models...',
-  'Claude: Scanning cross-industry patterns...',
-  'ChatGPT: Removing all constraints...',
-  'Gemini: Mapping emotional moments...',
-  'Models are thinking...',
-  'Generating ideas across all tiers...',
-  'Organising and calibrating results...',
-  'Almost there...',
-];
+type ModelState = 'waiting' | 'active' | 'done' | 'error';
+
+interface ModelInfo {
+  status: ModelState;
+  ideaCount: number;
+  error?: string;
+}
 
 export function LoadingScreen() {
   const { analysis, scores, setIdeas, setStep, goBack } = useAnalysisStore();
-  const [currentStep, setCurrentStep] = useState(0);
-  const [modelStatus, setModelStatus] = useState<Record<ModelSource, 'waiting' | 'active' | 'done'>>({
-    claude: 'waiting',
-    chatgpt: 'waiting',
-    gemini: 'waiting',
+  const [statusText, setStatusText] = useState('Connecting to AI models...');
+  const [modelInfo, setModelInfo] = useState<Record<ModelSource, ModelInfo>>({
+    claude: { status: 'waiting', ideaCount: 0 },
+    chatgpt: { status: 'waiting', ideaCount: 0 },
+    gemini: { status: 'waiting', ideaCount: 0 },
   });
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
+  const [allIdeas, setAllIdeas] = useState<Idea[]>([]);
   const fetchStarted = useRef(false);
 
   useEffect(() => {
     if (!analysis || fetchStarted.current) return;
     fetchStarted.current = true;
 
-    // Animate progress steps
-    const stepInterval = setInterval(() => {
-      setCurrentStep((prev) => {
-        if (prev >= PROGRESS_STEPS.length - 1) {
-          clearInterval(stepInterval);
-          return prev;
-        }
-        return prev + 1;
-      });
-    }, 3000);
+    const collectedIdeas: Idea[] = [];
+    let completedModels = 0;
 
-    // Animate model status (show active immediately since all 3 run in parallel)
-    const timers = [
-      setTimeout(() => setModelStatus((s) => ({ ...s, claude: 'active' })), 500),
-      setTimeout(() => setModelStatus((s) => ({ ...s, chatgpt: 'active' })), 1000),
-      setTimeout(() => setModelStatus((s) => ({ ...s, gemini: 'active' })), 1500),
-    ];
-
-    // Slow progress bar that fills to ~85% while waiting for API
-    const progressInterval = setInterval(() => {
-      setProgress((prev) => {
-        if (prev >= 85) {
-          clearInterval(progressInterval);
-          return 85;
-        }
-        return prev + 1;
-      });
-    }, 400);
-
-    // REAL API call
-    fetch('/api/analyze', {
+    fetch('/api/analyze-stream', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -76,34 +47,99 @@ export function LoadingScreen() {
       }),
     })
       .then((res) => {
-        if (!res.ok) throw new Error('API call failed');
-        return res.json();
-      })
-      .then((data: { ideas: Idea[] }) => {
-        // Mark all models done and fill progress
-        setModelStatus({ claude: 'done', chatgpt: 'done', gemini: 'done' });
-        setProgress(100);
-        setCurrentStep(PROGRESS_STEPS.length - 1);
+        if (!res.ok) throw new Error('Stream connection failed');
+        const reader = res.body?.getReader();
+        if (!reader) throw new Error('No reader available');
 
-        // Brief pause to show completion state, then transition
-        setTimeout(() => {
-          setIdeas(data.ideas);
-          setStep('results');
-        }, 800);
+        const decoder = new TextDecoder();
+        let buffer = '';
+
+        const processStream = async () => {
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+
+            buffer += decoder.decode(value, { stream: true });
+            const lines = buffer.split('\n\n');
+            buffer = lines.pop() || '';
+
+            for (const line of lines) {
+              if (!line.startsWith('data: ')) continue;
+              try {
+                const data = JSON.parse(line.slice(6));
+
+                switch (data.type) {
+                  case 'start':
+                    setStatusText('AI models are thinking...');
+                    setProgress(5);
+                    break;
+
+                  case 'model_start':
+                    setModelInfo((prev) => ({
+                      ...prev,
+                      [data.model]: { status: 'active', ideaCount: 0 },
+                    }));
+                    setStatusText(`${MODELS[data.model as ModelSource].name}: ${MODELS[data.model as ModelSource].lens}...`);
+                    break;
+
+                  case 'model_complete':
+                    completedModels++;
+                    collectedIdeas.push(...(data.ideas as Idea[]));
+                    setAllIdeas([...collectedIdeas]);
+                    setModelInfo((prev) => ({
+                      ...prev,
+                      [data.model]: { status: 'done', ideaCount: data.count },
+                    }));
+                    setProgress(Math.round((completedModels / 3) * 90) + 5);
+                    setStatusText(
+                      completedModels === 3
+                        ? 'All models complete!'
+                        : `${data.count} ideas from ${MODELS[data.model as ModelSource].name}...`
+                    );
+                    break;
+
+                  case 'model_error':
+                    completedModels++;
+                    setModelInfo((prev) => ({
+                      ...prev,
+                      [data.model]: {
+                        status: 'error',
+                        ideaCount: 0,
+                        error: data.error,
+                      },
+                    }));
+                    setProgress(Math.round((completedModels / 3) * 90) + 5);
+                    break;
+
+                  case 'complete':
+                    setProgress(100);
+                    setStatusText(`${data.totalIdeas} ideas generated!`);
+                    setTimeout(() => {
+                      if (collectedIdeas.length > 0) {
+                        setIdeas(collectedIdeas);
+                        setStep('results');
+                      } else {
+                        setError('All AI models failed. Please go back and try again.');
+                      }
+                    }, 800);
+                    break;
+                }
+              } catch {
+                // Skip malformed SSE lines
+              }
+            }
+          }
+        };
+
+        return processStream();
       })
       .catch((err) => {
-        console.error('Idea generation failed:', err);
-        setError('AI generation failed. Please go back and try again.');
-        clearInterval(progressInterval);
-        clearInterval(stepInterval);
+        console.error('Stream failed:', err);
+        setError('Connection to AI models failed. Please go back and try again.');
       });
-
-    return () => {
-      clearInterval(stepInterval);
-      clearInterval(progressInterval);
-      timers.forEach(clearTimeout);
-    };
   }, [analysis, scores, setIdeas, setStep]);
+
+  const totalIdeasSoFar = allIdeas.length;
 
   return (
     <div className="min-h-screen flex items-center justify-center p-6">
@@ -120,13 +156,17 @@ export function LoadingScreen() {
             className="absolute inset-0 rounded-full border-2 border-transparent border-t-ls-accent animate-spin-slow"
           />
           <div className="absolute inset-0 flex items-center justify-center">
-            <Sparkles className="w-8 h-8 text-ls-accent animate-pulse" />
+            {progress === 100 ? (
+              <span className="text-2xl font-bold gradient-text">{totalIdeasSoFar}</span>
+            ) : (
+              <Sparkles className="w-8 h-8 text-ls-accent animate-pulse" />
+            )}
           </div>
         </div>
 
         {/* Status Text */}
         <h2 className="text-2xl font-bold text-white mb-2">
-          {error ? 'Generation Failed' : 'Generating Ideas'}
+          {error ? 'Generation Failed' : progress === 100 ? 'Ideas Ready!' : 'Generating Ideas'}
         </h2>
         {error ? (
           <div className="mb-8">
@@ -139,31 +179,40 @@ export function LoadingScreen() {
             </button>
           </div>
         ) : (
-        <p className="text-gray-400 mb-8 h-6 transition-all">
-          {PROGRESS_STEPS[currentStep]}
-        </p>
+          <p className="text-gray-400 mb-8 h-6 transition-all">
+            {statusText}
+          </p>
         )}
 
         {/* Progress Bar */}
         <div className="w-full h-1.5 bg-ls-dark-border rounded-full mb-8 overflow-hidden">
           <div
-            className="h-full bg-gradient-to-r from-ls-accent to-ls-teal rounded-full transition-all duration-300"
+            className="h-full bg-gradient-to-r from-ls-accent to-ls-teal rounded-full transition-all duration-500"
             style={{ width: `${progress}%` }}
           />
         </div>
+
+        {/* Idea counter */}
+        {totalIdeasSoFar > 0 && !error && (
+          <p className="text-xs text-gray-500 mb-4">
+            {totalIdeasSoFar} idea{totalIdeasSoFar !== 1 ? 's' : ''} collected so far
+          </p>
+        )}
 
         {/* Model Status Cards */}
         <div className="grid grid-cols-3 gap-3">
           {MODEL_KEYS.map((key) => {
             const model = MODELS[key];
-            const status = modelStatus[key];
+            const info = modelInfo[key];
             return (
               <div
                 key={key}
                 className={`p-3 rounded-xl border transition-all ${
-                  status === 'done'
-                    ? 'bg-ls-dark-card border-white/10'
-                    : status === 'active'
+                  info.status === 'done'
+                    ? 'bg-ls-dark-card border-emerald-500/20'
+                    : info.status === 'error'
+                    ? 'bg-ls-dark-card border-red-500/20'
+                    : info.status === 'active'
                     ? 'bg-ls-dark-card border-ls-dark-border animate-pulse'
                     : 'bg-ls-dark border-ls-dark-border opacity-50'
                 }`}
@@ -171,16 +220,42 @@ export function LoadingScreen() {
                 <div className="flex items-center justify-center gap-1.5 mb-1">
                   <div
                     className={`w-2 h-2 rounded-full ${
-                      status === 'done' ? 'bg-emerald-400' : status === 'active' ? 'animate-pulse' : ''
+                      info.status === 'done'
+                        ? 'bg-emerald-400'
+                        : info.status === 'error'
+                        ? 'bg-red-400'
+                        : info.status === 'active'
+                        ? 'animate-pulse'
+                        : ''
                     }`}
-                    style={{ backgroundColor: status !== 'done' ? model.color : undefined }}
+                    style={{
+                      backgroundColor:
+                        info.status === 'done'
+                          ? undefined
+                          : info.status === 'error'
+                          ? undefined
+                          : model.color,
+                    }}
                   />
                   <span className="text-xs font-medium text-gray-300">{model.name}</span>
                 </div>
                 <p className="text-xs text-gray-500">{model.lens}</p>
-                <p className="text-xs mt-1 font-medium" style={{ color: model.color }}>
-                  {status === 'done' ? 'Complete' : status === 'active' ? 'Generating...' : 'Queued'}
-                </p>
+                {info.status === 'done' ? (
+                  <p className="text-xs mt-1 font-medium text-emerald-400">
+                    {info.ideaCount} ideas
+                  </p>
+                ) : info.status === 'error' ? (
+                  <div className="flex items-center justify-center gap-1 mt-1">
+                    <AlertCircle className="w-3 h-3 text-red-400" />
+                    <p className="text-xs font-medium text-red-400 truncate" title={info.error}>
+                      Failed
+                    </p>
+                  </div>
+                ) : (
+                  <p className="text-xs mt-1 font-medium" style={{ color: model.color }}>
+                    {info.status === 'active' ? 'Generating...' : 'Queued'}
+                  </p>
+                )}
               </div>
             );
           })}

@@ -268,6 +268,25 @@ async function withRetry<T>(
   throw new Error('withRetry: should not reach here');
 }
 
+// ── Generate ideas for a single model (used by SSE streaming) ──
+
+export async function generateIdeasForModel(
+  model: ModelSource,
+  analysisId: string,
+  companyName: string,
+  description: string,
+  scores: Partial<Record<DimensionKey, number>>
+): Promise<Idea[]> {
+  const generators: Record<ModelSource, () => Promise<Idea[]>> = {
+    claude: () => generateIdeasClaude(analysisId, companyName, description, scores),
+    chatgpt: () => generateIdeasChatGPT(analysisId, companyName, description, scores),
+    gemini: () => generateIdeasGemini(analysisId, companyName, description, scores),
+  };
+  const retries = model === 'gemini' ? 3 : 2;
+  const delay = model === 'gemini' ? 5000 : 3000;
+  return withRetry(generators[model], retries, delay);
+}
+
 // ── Generate all ideas in parallel (resilient) ──
 
 export async function generateAllIdeas(
