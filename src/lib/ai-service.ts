@@ -240,7 +240,35 @@ function parseIdeas(
   }));
 }
 
-// ── Generate all ideas in parallel ──
+// ── Retry helper ──
+
+async function withRetry<T>(
+  fn: () => Promise<T>,
+  retries = 2,
+  delayMs = 3000
+): Promise<T> {
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      return await fn();
+    } catch (err: unknown) {
+      const isRateLimit =
+        err instanceof Error &&
+        (err.message.includes('429') ||
+          err.message.includes('Too Many Requests') ||
+          err.message.includes('RESOURCE_EXHAUSTED'));
+      const status = (err as { status?: number }).status;
+      if ((isRateLimit || status === 429) && attempt < retries) {
+        console.warn(`Rate limited, retrying in ${delayMs}ms (attempt ${attempt + 1}/${retries})...`);
+        await new Promise((r) => setTimeout(r, delayMs * (attempt + 1)));
+        continue;
+      }
+      throw err;
+    }
+  }
+  throw new Error('withRetry: should not reach here');
+}
+
+// ── Generate all ideas in parallel (resilient) ──
 
 export async function generateAllIdeas(
   analysisId: string,
@@ -248,13 +276,28 @@ export async function generateAllIdeas(
   description: string,
   scores: Partial<Record<DimensionKey, number>>
 ): Promise<Idea[]> {
-  const [claudeIdeas, chatgptIdeas, geminiIdeas] = await Promise.all([
-    generateIdeasClaude(analysisId, companyName, description, scores),
-    generateIdeasChatGPT(analysisId, companyName, description, scores),
-    generateIdeasGemini(analysisId, companyName, description, scores),
+  const results = await Promise.allSettled([
+    withRetry(() => generateIdeasClaude(analysisId, companyName, description, scores)),
+    withRetry(() => generateIdeasChatGPT(analysisId, companyName, description, scores)),
+    withRetry(() => generateIdeasGemini(analysisId, companyName, description, scores), 3, 5000),
   ]);
 
-  return [...claudeIdeas, ...chatgptIdeas, ...geminiIdeas];
+  const allIdeas: Idea[] = [];
+  const modelNames = ['Claude', 'ChatGPT', 'Gemini'];
+  for (let i = 0; i < results.length; i++) {
+    const result = results[i];
+    if (result.status === 'fulfilled') {
+      allIdeas.push(...result.value);
+    } else {
+      console.error(`${modelNames[i]} idea generation failed:`, result.reason);
+    }
+  }
+
+  if (allIdeas.length === 0) {
+    throw new Error('All AI models failed to generate ideas.');
+  }
+
+  return allIdeas;
 }
 
 // ── Idea Detail Expansion ──

@@ -18,7 +18,8 @@ import React from 'react';
 
 const TIER_KEYS: StarLevel[] = [6, 7, 8, 9];
 
-function renderMarkdown(text: string): React.ReactNode[] {
+function renderMarkdown(text: string | undefined | null): React.ReactNode[] {
+  if (!text) return [<React.Fragment key="empty" />];
   const parts = text.split(/(\*\*[^*]+\*\*)/g);
   return parts.map((part, i) => {
     if (part.startsWith('**') && part.endsWith('**')) {
