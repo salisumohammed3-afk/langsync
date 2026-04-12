@@ -19,7 +19,7 @@ export function Markdown({ text, className = '' }: MarkdownProps) {
     // H3 headers
     if (line.startsWith('### ')) {
       elements.push(
-        <h3 key={i} className="text-base font-bold text-white mt-4 mb-2 first:mt-0">
+        <h3 key={i} className="text-base font-bold text-ls-text mt-4 mb-2 first:mt-0">
           {renderInline(line.slice(4))}
         </h3>
       );
@@ -29,7 +29,7 @@ export function Markdown({ text, className = '' }: MarkdownProps) {
     // H2 headers
     if (line.startsWith('## ')) {
       elements.push(
-        <h2 key={i} className="text-lg font-bold text-white mt-4 mb-2 first:mt-0">
+        <h2 key={i} className="text-lg font-bold text-ls-text mt-4 mb-2 first:mt-0">
           {renderInline(line.slice(3))}
         </h2>
       );
@@ -41,7 +41,7 @@ export function Markdown({ text, className = '' }: MarkdownProps) {
       const content = line.replace(/^\d+\.\s/, '');
       elements.push(
         <div key={i} className="flex gap-2 ml-1 mb-1">
-          <span className="text-gray-500 flex-shrink-0">{line.match(/^\d+/)?.[0]}.</span>
+          <span className="text-ls-text-secondary flex-shrink-0">{line.match(/^\d+/)?.[0]}.</span>
           <span>{renderInline(content)}</span>
         </div>
       );
@@ -52,7 +52,7 @@ export function Markdown({ text, className = '' }: MarkdownProps) {
     if (line.startsWith('- ') || line.startsWith('* ')) {
       elements.push(
         <div key={i} className="flex gap-2 ml-1 mb-1">
-          <span className="text-gray-500 flex-shrink-0">•</span>
+          <span className="text-ls-text-secondary flex-shrink-0">•</span>
           <span>{renderInline(line.slice(2))}</span>
         </div>
       );
@@ -74,7 +74,7 @@ export function Markdown({ text, className = '' }: MarkdownProps) {
   }
 
   return (
-    <div className={`text-sm text-gray-400 leading-relaxed ${className}`}>
+    <div className={`text-sm text-ls-text-secondary leading-relaxed ${className}`}>
       {elements}
     </div>
   );
@@ -86,7 +86,7 @@ function renderInline(text: string): React.ReactNode[] {
   return parts.map((part, i) => {
     if (part.startsWith('**') && part.endsWith('**')) {
       return (
-        <strong key={i} className="text-white font-semibold">
+        <strong key={i} className="text-ls-text font-semibold">
           {part.slice(2, -2)}
         </strong>
       );

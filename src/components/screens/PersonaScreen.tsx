@@ -81,32 +81,32 @@ export function PersonaScreen() {
   });
 
   return (
-    <div className="min-h-screen p-6">
+    <div className="min-h-screen p-6 bg-white">
       <div className="max-w-6xl mx-auto animate-fade-in">
         {/* Header */}
         <div className="mb-8">
           <button
             onClick={goBack}
-            className="flex items-center gap-1 text-sm text-gray-400 hover:text-white transition-colors mb-6"
+            className="flex items-center gap-1 text-sm text-ls-text-secondary hover:text-ls-text transition-colors mb-6"
           >
             <ArrowLeft className="w-4 h-4" />
             Back
           </button>
           <div className="flex items-start justify-between">
             <div>
-              <h2 className="text-3xl font-bold text-white mb-2">
+              <h2 className="text-3xl font-bold text-ls-text mb-2">
                 Persona Panel
               </h2>
-              <p className="text-gray-400">
+              <p className="text-ls-text-secondary">
                 8 AI-generated stakeholders have independently scored{' '}
-                <span className="text-white font-medium">{analysis?.company_name}</span>.
+                <span className="text-ls-text font-medium">{analysis?.company_name}</span>.
                 See where they agree — and where they don&apos;t.
               </p>
             </div>
             {personas.length > 0 && (
               <button
                 onClick={handleRegenerate}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs text-gray-400 hover:text-white bg-white/5 hover:bg-white/10 transition-all flex-shrink-0"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs text-ls-text-secondary hover:text-ls-text bg-ls-bg-secondary hover:bg-ls-bg-hover border border-ls-border transition-all flex-shrink-0"
               >
                 <RefreshCw className="w-3 h-3" />
                 Regenerate
@@ -114,7 +114,7 @@ export function PersonaScreen() {
             )}
           </div>
           {prioritized.size > 0 && (
-            <div className="mt-3 text-xs text-ls-accent flex items-center gap-1.5">
+            <div className="mt-3 text-xs text-ls-red flex items-center gap-1.5">
               <Star className="w-3 h-3" fill="currentColor" />
               {prioritized.size} persona{prioritized.size !== 1 ? 's' : ''} prioritized — their perspectives will be weighted in analysis
             </div>
@@ -124,19 +124,19 @@ export function PersonaScreen() {
         {/* Loading State */}
         {loading && (
           <div className="flex flex-col items-center justify-center py-20 animate-fade-in">
-            <Loader2 className="w-10 h-10 text-ls-accent animate-spin mb-4" />
-            <p className="text-gray-400 text-sm">Generating stakeholder personas with AI...</p>
-            <p className="text-gray-600 text-xs mt-1">This may take 10–15 seconds</p>
+            <Loader2 className="w-10 h-10 text-ls-red animate-spin mb-4" />
+            <p className="text-ls-text-secondary text-sm">Generating stakeholder personas with AI...</p>
+            <p className="text-ls-text-muted text-xs mt-1">This may take 10–15 seconds</p>
           </div>
         )}
 
         {/* Error State */}
         {error && (
           <div className="flex flex-col items-center justify-center py-20 animate-fade-in">
-            <p className="text-red-400 text-sm mb-3">{error}</p>
+            <p className="text-ls-red text-sm mb-3">{error}</p>
             <button
               onClick={handleRegenerate}
-              className="px-4 py-2 rounded-lg bg-white/5 text-white text-sm hover:bg-white/10 transition-colors"
+              className="px-4 py-2 rounded-full bg-ls-bg-secondary text-ls-text text-sm hover:bg-ls-bg-hover border border-ls-border transition-colors"
             >
               Retry
             </button>
@@ -153,8 +153,8 @@ export function PersonaScreen() {
             return (
             <div
               key={persona.id}
-              className={`rounded-xl bg-ls-dark-card border transition-all animate-slide-up ${
-                isPriority ? 'border-ls-accent/30 ring-1 ring-ls-accent/10' : 'border-ls-dark-border hover:border-white/10'
+              className={`rounded-2xl bg-white border transition-all animate-slide-up ${
+                isPriority ? 'border-ls-red/30 ring-1 ring-ls-red/10 shadow-md' : 'border-ls-border hover:shadow-md'
               }`}
               style={{ animationDelay: `${idx * 80}ms` }}
             >
@@ -163,13 +163,13 @@ export function PersonaScreen() {
                 <div className="flex items-center gap-3 mb-3">
                   <span className="text-2xl">{persona.emoji}</span>
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-semibold text-white truncate">{persona.name}</p>
-                    <p className="text-xs text-gray-500 truncate">{persona.role}</p>
+                    <p className="text-sm font-semibold text-ls-text truncate">{persona.name}</p>
+                    <p className="text-xs text-ls-text-secondary truncate">{persona.role}</p>
                   </div>
                   <button
                     onClick={() => togglePriority(persona.id)}
                     className={`p-1 rounded transition-all ${
-                      isPriority ? 'text-ls-accent' : 'text-gray-600 hover:text-gray-400'
+                      isPriority ? 'text-ls-red' : 'text-ls-text-muted hover:text-ls-text-secondary'
                     }`}
                     title={isPriority ? 'Remove priority' : 'Mark as high priority'}
                   >
@@ -177,7 +177,7 @@ export function PersonaScreen() {
                   </button>
                 </div>
 
-                <p className="text-xs text-gray-400 mb-4 line-clamp-2">{persona.description}</p>
+                <p className="text-xs text-ls-text-secondary mb-4 line-clamp-2">{persona.description}</p>
 
                 {/* Dimension Scores */}
                 <div className="space-y-2">
@@ -187,24 +187,24 @@ export function PersonaScreen() {
                     const diff = personaScore - userScore;
                     return (
                       <div key={key} className="flex items-center justify-between">
-                        <span className="text-xs text-gray-500 truncate flex-1">
+                        <span className="text-xs text-ls-text-secondary truncate flex-1">
                           {DIMENSIONS[key].label}
                         </span>
                         <div className="flex items-center gap-1.5">
                           <span
                             className="text-xs font-semibold tabular-nums w-5 text-right"
                             style={{
-                              color: personaScore <= 3 ? '#F87171' : personaScore <= 6 ? '#F59E0B' : '#A3E635',
+                              color: personaScore <= 3 ? '#FF385C' : personaScore <= 6 ? '#E07912' : '#008489',
                             }}
                           >
                             {personaScore}
                           </span>
                           {diff > 0 ? (
-                            <TrendingUp className="w-3 h-3 text-emerald-400" />
+                            <TrendingUp className="w-3 h-3 text-ls-teal" />
                           ) : diff < 0 ? (
-                            <TrendingDown className="w-3 h-3 text-red-400" />
+                            <TrendingDown className="w-3 h-3 text-ls-red" />
                           ) : (
-                            <Minus className="w-3 h-3 text-gray-600" />
+                            <Minus className="w-3 h-3 text-ls-text-muted" />
                           )}
                         </div>
                       </div>
@@ -215,7 +215,7 @@ export function PersonaScreen() {
                 {/* Expand toggle for reasoning */}
                 <button
                   onClick={() => setExpandedPersona(isExpanded ? null : persona.id)}
-                  className="flex items-center gap-1 mt-3 text-xs text-gray-500 hover:text-gray-300 transition-colors w-full justify-center"
+                  className="flex items-center gap-1 mt-3 text-xs text-ls-text-secondary hover:text-ls-text transition-colors w-full justify-center"
                 >
                   {isExpanded ? 'Hide reasoning' : 'Why this persona?'}
                   {isExpanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
@@ -224,17 +224,17 @@ export function PersonaScreen() {
 
               {/* Reasoning Panel */}
               {isExpanded && (
-                <div className="px-4 pb-4 pt-0 border-t border-ls-dark-border mt-0 animate-slide-up">
+                <div className="px-4 pb-4 pt-0 border-t border-ls-border mt-0 animate-slide-up">
                   <div className="pt-3">
-                    <p className="text-xs text-gray-400 leading-relaxed">
-                      <span className="text-gray-300 font-medium">Why included: </span>
+                    <p className="text-xs text-ls-text-secondary leading-relaxed">
+                      <span className="text-ls-text font-medium">Why included: </span>
                       {persona.description} This perspective ensures your {analysis?.company_name} analysis
                       captures the viewpoint of {persona.role.toLowerCase()}s who directly impact
                       {' '}{findStrongestDimension(persona.scores)} outcomes.
                     </p>
                     <div className="mt-2 flex items-center gap-2">
-                      <span className="text-xs text-gray-600">Biggest gap with you:</span>
-                      <span className="text-xs font-medium text-amber-400">
+                      <span className="text-xs text-ls-text-muted">Biggest gap with you:</span>
+                      <span className="text-xs font-medium text-ls-gold">
                         {findBiggestGap(persona.scores, scores)}
                       </span>
                     </div>
@@ -247,8 +247,8 @@ export function PersonaScreen() {
         </div>
 
         {/* Variance Summary */}
-        <div className="p-5 rounded-xl bg-ls-dark-card border border-ls-dark-border mb-8">
-          <h3 className="text-sm font-semibold text-gray-300 mb-3">Variance Highlights</h3>
+        <div className="p-5 rounded-2xl bg-ls-bg-secondary border border-ls-border mb-8">
+          <h3 className="text-sm font-semibold text-ls-text mb-3">Variance Highlights</h3>
           <div className="grid grid-cols-1 sm:grid-cols-5 gap-3">
             {DIMENSION_KEYS.map((key) => {
               const personaScores = personas.map((p) => p.scores[key]);
@@ -259,12 +259,12 @@ export function PersonaScreen() {
               const variance = Math.abs(avg - userScore);
               return (
                 <div key={key} className="text-center">
-                  <p className="text-xs text-gray-500 mb-1">{DIMENSIONS[key].label}</p>
-                  <p className="text-sm font-semibold text-white">
+                  <p className="text-xs text-ls-text-secondary mb-1">{DIMENSIONS[key].label}</p>
+                  <p className="text-sm font-semibold text-ls-text">
                     You: {userScore} / Panel: {avg.toFixed(1)}
                   </p>
                   {variance > 1.5 && (
-                    <p className="text-xs text-amber-400 mt-0.5">High variance</p>
+                    <p className="text-xs text-ls-gold mt-0.5">High variance</p>
                   )}
                 </div>
               );
@@ -275,7 +275,7 @@ export function PersonaScreen() {
         {/* Continue */}
         <button
           onClick={handleContinue}
-          className="w-full flex items-center justify-center gap-2 py-4 rounded-xl text-base font-semibold bg-gradient-to-r from-ls-accent to-ls-teal text-ls-dark hover:shadow-lg hover:shadow-ls-accent/20 hover:scale-[1.01] transition-all"
+          className="w-full flex items-center justify-center gap-2 py-4 rounded-xl text-base font-semibold bg-gradient-to-r from-ls-red to-ls-red-dark text-white hover:shadow-lg hover:shadow-ls-red/20 hover:scale-[1.01] transition-all"
         >
           Generate Ideas Across All Models
           <ArrowRight className="w-5 h-5" />

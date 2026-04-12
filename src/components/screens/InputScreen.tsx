@@ -78,64 +78,59 @@ export function InputScreen() {
   const descriptionLength = description.length;
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center p-6">
-      {/* Ambient glows */}
-      <div className="ambient-glow w-96 h-96 bg-ls-accent top-20 -left-48" />
-      <div className="ambient-glow w-80 h-80 bg-ls-teal bottom-20 -right-40" />
-      <div className="ambient-glow w-64 h-64 bg-ls-gemini top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
-
-      <div className="relative z-10 w-full max-w-2xl animate-fade-in">
+    <div className="min-h-screen flex items-center justify-center p-6 bg-white">
+      <div className="w-full max-w-2xl animate-fade-in">
         {/* Logo */}
         <div className="text-center mb-12">
           <div className="inline-flex items-center gap-2 mb-6">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-ls-accent to-ls-teal flex items-center justify-center animate-float">
-              <Sparkles className="w-5 h-5 text-ls-dark" />
+            <div className="w-10 h-10 rounded-xl bg-ls-red flex items-center justify-center">
+              <Sparkles className="w-5 h-5 text-white" />
             </div>
             <span className="text-2xl font-bold tracking-tight">
               <span className="gradient-text">LangSync</span>
             </span>
           </div>
-          <h1 className="text-4xl font-bold text-white mb-3">
+          <h1 className="text-4xl font-bold text-ls-text mb-3">
             What does a <span className="gradient-text">10-star</span> version look like?
           </h1>
-          <p className="text-gray-400 text-lg max-w-lg mx-auto">
+          <p className="text-ls-text-secondary text-lg max-w-lg mx-auto">
             Three AI models. Three strategic lenses. Ideas from delightful to transformative.
           </p>
         </div>
 
         {/* Session History */}
         {savedSessions.length > 0 && (
-          <div className="mb-8 p-4 rounded-xl bg-ls-dark-card border border-ls-dark-border">
+          <div className="mb-8 p-4 rounded-2xl bg-ls-bg-secondary border border-ls-border">
             <div className="flex items-center gap-2 mb-3">
-              <Clock className="w-4 h-4 text-gray-400" />
-              <h3 className="text-sm font-semibold text-gray-300">Recent Analyses</h3>
+              <Clock className="w-4 h-4 text-ls-text-secondary" />
+              <h3 className="text-sm font-semibold text-ls-text">Recent Analyses</h3>
             </div>
             <div className="space-y-2 max-h-40 overflow-y-auto">
               {savedSessions.slice(0, 5).map((session) => (
                 <div
                   key={session.id}
-                  className="flex items-center justify-between p-2.5 rounded-lg bg-ls-dark/50 border border-ls-dark-border hover:border-white/10 transition-all group"
+                  className="flex items-center justify-between p-2.5 rounded-xl bg-white border border-ls-border hover:shadow-md transition-all group"
                 >
                   <button
                     onClick={() => loadSession(session.id)}
                     className="flex items-center gap-3 flex-1 min-w-0 text-left"
                   >
                     <div className="min-w-0 flex-1">
-                      <p className="text-sm font-medium text-white truncate">
+                      <p className="text-sm font-medium text-ls-text truncate">
                         {session.analysis.company_name}
                       </p>
-                      <p className="text-xs text-gray-500">
+                      <p className="text-xs text-ls-text-secondary">
                         {session.ideas.length} ideas · {new Date(session.savedAt).toLocaleDateString()}
                       </p>
                     </div>
-                    <ExternalLink className="w-3.5 h-3.5 text-gray-600 group-hover:text-gray-400 flex-shrink-0" />
+                    <ExternalLink className="w-3.5 h-3.5 text-ls-text-muted group-hover:text-ls-text-secondary flex-shrink-0" />
                   </button>
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
                       deleteSession(session.id);
                     }}
-                    className="ml-2 p-1 rounded text-gray-600 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all flex-shrink-0"
+                    className="ml-2 p-1 rounded text-ls-text-muted hover:text-ls-red opacity-0 group-hover:opacity-100 transition-all flex-shrink-0"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
                   </button>
@@ -145,14 +140,14 @@ export function InputScreen() {
           </div>
         )}
 
-        {/* Mode Toggle */}
-        <div className="flex gap-2 mb-8 p-1 bg-ls-dark-card rounded-xl border border-ls-dark-border">
+        {/* Mode Toggle — Airbnb pill style */}
+        <div className="flex gap-2 mb-8 p-1.5 bg-ls-bg-secondary rounded-full border border-ls-border">
           <button
             onClick={() => setMode('scan')}
-            className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-lg text-sm font-medium transition-all ${
+            className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-full text-sm font-medium transition-all ${
               mode === 'scan'
-                ? 'bg-ls-dark-lighter text-white shadow-lg'
-                : 'text-gray-400 hover:text-gray-300'
+                ? 'bg-white text-ls-text shadow-md'
+                : 'text-ls-text-secondary hover:text-ls-text'
             }`}
           >
             <Globe className="w-4 h-4" />
@@ -160,10 +155,10 @@ export function InputScreen() {
           </button>
           <button
             onClick={() => setMode('describe')}
-            className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-lg text-sm font-medium transition-all ${
+            className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-full text-sm font-medium transition-all ${
               mode === 'describe'
-                ? 'bg-ls-dark-lighter text-white shadow-lg'
-                : 'text-gray-400 hover:text-gray-300'
+                ? 'bg-white text-ls-text shadow-md'
+                : 'text-ls-text-secondary hover:text-ls-text'
             }`}
           >
             <FileText className="w-4 h-4" />
@@ -172,9 +167,9 @@ export function InputScreen() {
         </div>
 
         {/* Input Fields */}
-        <div className="space-y-4 mb-8">
+        <div className="space-y-5 mb-8">
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
+            <label className="block text-sm font-medium text-ls-text mb-2">
               Company Name
             </label>
             <input
@@ -182,13 +177,13 @@ export function InputScreen() {
               value={companyName}
               onChange={(e) => setCompanyName(e.target.value)}
               placeholder="e.g. Stripe, Notion, Linear"
-              className="w-full px-4 py-3 bg-ls-dark-card border border-ls-dark-border rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-ls-accent/30 focus:border-ls-accent/50 transition-all"
+              className="w-full px-4 py-3.5 bg-white border border-ls-border-dark rounded-xl text-ls-text placeholder-ls-text-muted focus:outline-none focus:ring-2 focus:ring-ls-red/20 focus:border-ls-red transition-all"
             />
           </div>
 
           {mode === 'scan' && (
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-ls-text mb-2">
                 Website URL
               </label>
               <div className="flex gap-2">
@@ -201,15 +196,15 @@ export function InputScreen() {
                     setScanError(null);
                   }}
                   placeholder="https://example.com"
-                  className="flex-1 px-4 py-3 bg-ls-dark-card border border-ls-dark-border rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-ls-accent/30 focus:border-ls-accent/50 transition-all"
+                  className="flex-1 px-4 py-3.5 bg-white border border-ls-border-dark rounded-xl text-ls-text placeholder-ls-text-muted focus:outline-none focus:ring-2 focus:ring-ls-red/20 focus:border-ls-red transition-all"
                 />
                 <button
                   onClick={handleScan}
                   disabled={!companyUrl.trim() || scanning}
-                  className={`px-4 py-3 rounded-xl text-sm font-medium transition-all flex items-center gap-2 ${
+                  className={`px-5 py-3.5 rounded-xl text-sm font-medium transition-all flex items-center gap-2 ${
                     companyUrl.trim() && !scanning
-                      ? 'bg-ls-accent/20 text-ls-accent hover:bg-ls-accent/30'
-                      : 'bg-ls-dark-card text-gray-600 cursor-not-allowed'
+                      ? 'bg-ls-bg-secondary text-ls-text border border-ls-border-dark hover:bg-ls-bg-hover'
+                      : 'bg-ls-bg-secondary text-ls-text-muted border border-ls-border cursor-not-allowed'
                   }`}
                 >
                   {scanning ? (
@@ -223,14 +218,14 @@ export function InputScreen() {
 
               {/* Scan Result */}
               {scanResult && (
-                <div className="mt-3 p-3 rounded-lg bg-emerald-500/5 border border-emerald-500/20 animate-slide-up">
+                <div className="mt-3 p-3.5 rounded-xl bg-ls-teal-light border border-ls-teal/20 animate-slide-up">
                   <div className="flex items-center gap-2 mb-2">
-                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                    <span className="text-xs font-medium text-emerald-400">
+                    <div className="w-1.5 h-1.5 rounded-full bg-ls-teal" />
+                    <span className="text-xs font-medium text-ls-teal">
                       Scan Complete
                     </span>
                     {scanResult.industry && (
-                      <span className="text-xs px-2 py-0.5 rounded-full bg-white/5 text-gray-400 ring-1 ring-white/5">
+                      <span className="text-xs px-2 py-0.5 rounded-full bg-white text-ls-text-secondary border border-ls-border">
                         {scanResult.industry}
                       </span>
                     )}
@@ -238,14 +233,14 @@ export function InputScreen() {
                   {scanResult.key_products && scanResult.key_products.length > 0 && (
                     <div className="flex flex-wrap gap-1.5 mt-1">
                       {scanResult.key_products.map((p, i) => (
-                        <span key={i} className="text-xs px-2 py-0.5 rounded-full bg-white/5 text-gray-500">
+                        <span key={i} className="text-xs px-2 py-0.5 rounded-full bg-white text-ls-text-secondary border border-ls-border">
                           {p}
                         </span>
                       ))}
                     </div>
                   )}
                   {scanResult.target_audience && (
-                    <p className="text-xs text-gray-500 mt-1.5">
+                    <p className="text-xs text-ls-text-secondary mt-1.5">
                       Target: {scanResult.target_audience}
                     </p>
                   )}
@@ -254,9 +249,9 @@ export function InputScreen() {
 
               {/* Scan Error */}
               {scanError && (
-                <div className="mt-3 p-3 rounded-lg bg-red-500/5 border border-red-500/20 flex items-center gap-2 animate-slide-up">
-                  <AlertCircle className="w-4 h-4 text-red-400 flex-shrink-0" />
-                  <span className="text-xs text-red-400">{scanError}</span>
+                <div className="mt-3 p-3.5 rounded-xl bg-ls-red-light border border-ls-red/20 flex items-center gap-2 animate-slide-up">
+                  <AlertCircle className="w-4 h-4 text-ls-red flex-shrink-0" />
+                  <span className="text-xs text-ls-red">{scanError}</span>
                 </div>
               )}
             </div>
@@ -264,12 +259,12 @@ export function InputScreen() {
 
           <div>
             <div className="flex items-baseline justify-between mb-2">
-              <label className="text-sm font-medium text-gray-300">
+              <label className="text-sm font-medium text-ls-text">
                 {mode === 'scan' ? 'Additional Context' : 'Describe Your Idea'}
-                {mode === 'scan' && <span className="text-gray-500"> (optional)</span>}
+                {mode === 'scan' && <span className="text-ls-text-muted"> (optional)</span>}
               </label>
               {mode === 'describe' && (
-                <span className={`text-xs ${descriptionLength > 500 ? 'text-amber-400' : 'text-gray-600'}`}>
+                <span className={`text-xs ${descriptionLength > 500 ? 'text-ls-gold' : 'text-ls-text-muted'}`}>
                   {descriptionLength}/1000
                 </span>
               )}
@@ -285,7 +280,7 @@ export function InputScreen() {
                   : 'Describe the product, service, or experience you want to reimagine...'
               }
               rows={4}
-              className="w-full px-4 py-3 bg-ls-dark-card border border-ls-dark-border rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-ls-accent/30 focus:border-ls-accent/50 transition-all resize-none"
+              className="w-full px-4 py-3.5 bg-white border border-ls-border-dark rounded-xl text-ls-text placeholder-ls-text-muted focus:outline-none focus:ring-2 focus:ring-ls-red/20 focus:border-ls-red transition-all resize-none"
             />
           </div>
         </div>
@@ -295,28 +290,28 @@ export function InputScreen() {
           {Object.entries(MODELS).map(([key, model]) => (
             <div
               key={key}
-              className="flex-1 flex items-center gap-2 px-3 py-2 rounded-lg bg-ls-dark-card border border-ls-dark-border"
+              className="flex-1 flex items-center gap-2 px-3 py-2.5 rounded-xl bg-ls-bg-secondary border border-ls-border"
             >
               <div
                 className="w-2 h-2 rounded-full"
                 style={{ backgroundColor: model.color }}
               />
               <div className="min-w-0">
-                <p className="text-xs font-medium text-gray-300 truncate">{model.name}</p>
-                <p className="text-xs text-gray-500 truncate">{model.lens}</p>
+                <p className="text-xs font-medium text-ls-text truncate">{model.name}</p>
+                <p className="text-xs text-ls-text-secondary truncate">{model.lens}</p>
               </div>
             </div>
           ))}
         </div>
 
-        {/* Submit */}
+        {/* Submit — Airbnb coral red button */}
         <button
           onClick={handleSubmit}
           disabled={!canProceed || submitting}
           className={`w-full flex items-center justify-center gap-2 py-4 rounded-xl text-base font-semibold transition-all ${
             canProceed && !submitting
-              ? 'bg-gradient-to-r from-ls-accent to-ls-teal text-ls-dark hover:shadow-lg hover:shadow-ls-accent/20 hover:scale-[1.01]'
-              : 'bg-ls-dark-card text-gray-500 border border-ls-dark-border cursor-not-allowed'
+              ? 'bg-gradient-to-r from-ls-red to-ls-red-dark text-white hover:shadow-lg hover:shadow-ls-red/20 hover:scale-[1.01]'
+              : 'bg-ls-bg-secondary text-ls-text-muted border border-ls-border cursor-not-allowed'
           }`}
         >
           {submitting ? (
