@@ -72,14 +72,14 @@ export function ScoringScreen() {
   const { scores, analysis, setScore, setStep, goBack } = useAnalysisStore();
   const [hoveredDim, setHoveredDim] = useState<DimensionKey | null>(null);
 
-  const allScored = DIMENSION_KEYS.every((key) => scores[key] !== undefined);
-  const avgScore = allScored
-    ? DIMENSION_KEYS.reduce((sum, k) => sum + (scores[k] ?? 5), 0) / DIMENSION_KEYS.length
-    : 0;
-  const tierMapping = allScored ? getScoreToTierMapping(avgScore) : null;
+  const avgScore = DIMENSION_KEYS.reduce((sum, k) => sum + (scores[k] ?? 5), 0) / DIMENSION_KEYS.length;
+  const tierMapping = getScoreToTierMapping(avgScore);
 
   const handleContinue = () => {
-    if (!allScored) return;
+    // Default any unscored dimensions to 5 before proceeding
+    DIMENSION_KEYS.forEach((key) => {
+      if (scores[key] === undefined) setScore(key, 5);
+    });
     setStep('personas');
   };
 
@@ -108,9 +108,7 @@ export function ScoringScreen() {
           {DIMENSION_KEYS.map((key) => (
             <div
               key={key}
-              className={`flex-1 h-1 rounded-full transition-all ${
-                scores[key] !== undefined ? 'bg-ls-red' : 'bg-ls-border'
-              }`}
+              className="flex-1 h-1 rounded-full transition-all bg-ls-red"
             />
           ))}
         </div>
@@ -174,7 +172,7 @@ export function ScoringScreen() {
         </div>
 
         {/* Score-to-Tier Mapping */}
-        {allScored && tierMapping && (
+        {tierMapping && (
           <div className="mb-8 p-5 rounded-2xl bg-ls-bg-secondary border border-ls-border animate-slide-up">
             <div className="flex items-center justify-between mb-3">
               <span className="text-sm text-ls-text-secondary">Overall Average</span>
@@ -207,12 +205,7 @@ export function ScoringScreen() {
         {/* Continue */}
         <button
           onClick={handleContinue}
-          disabled={!allScored}
-          className={`w-full flex items-center justify-center gap-2 py-4 rounded-xl text-base font-semibold transition-all ${
-            allScored
-              ? 'bg-gradient-to-r from-ls-red to-ls-red-dark text-white hover:shadow-lg hover:shadow-ls-red/20 hover:scale-[1.01]'
-              : 'bg-ls-bg-secondary text-ls-text-muted border border-ls-border cursor-not-allowed'
-          }`}
+          className="w-full flex items-center justify-center gap-2 py-4 rounded-xl text-base font-semibold transition-all bg-gradient-to-r from-ls-red to-ls-red-dark text-white hover:shadow-lg hover:shadow-ls-red/20 hover:scale-[1.01]"
         >
           Continue to Persona Panel
           <ArrowRight className="w-5 h-5" />
